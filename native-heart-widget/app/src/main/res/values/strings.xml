@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Heart Widget</string>
+    <string name="heart_description">Heart</string>
+    <string name="settings_title">Heart Widget</string>
+    <string name="settings_subtitle">Local prototype settings for the paired heart idea.</string>
+    <string name="local_beat_count">Local beat count</string>
+    <string name="pairing_status">Pairing status</string>
+    <string name="pairing_local_only">Local-only mode, no partner connected yet</string>
+    <string name="beat_count_display">%1$d (%2$s)</string>
+    <string name="add_test_beat">Add test beat</string>
+    <string name="add_many_test_beats">Add 1000 test beats</string>
+    <string name="reset_count">Reset count</string>
+    <string name="refresh_widgets">Refresh widgets</string>
+</resources>

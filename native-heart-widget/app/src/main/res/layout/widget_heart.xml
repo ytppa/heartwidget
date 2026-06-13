@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <ImageView
+        android:id="@+id/heart_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/heart_description"
+        android:padding="0dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/heart_00" />
+
+    <TextView
+        android:id="@+id/beat_count_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="44dp"
+        android:layout_marginEnd="13dp"
+        android:background="@drawable/count_badge_background"
+        android:gravity="center"
+        android:minWidth="24dp"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:textColor="#D71942"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+</FrameLayout>
