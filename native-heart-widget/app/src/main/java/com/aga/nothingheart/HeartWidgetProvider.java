@@ -44,7 +44,8 @@ public class HeartWidgetProvider extends AppWidgetProvider {
         super.onReceive(context, intent);
 
         if (ACTION_HEART_BEAT.equals(intent.getAction())) {
-            HeartStateStore.incrementLocalBeatCount(context);
+            HeartStateStore.incrementSentBeatCount(context);
+            HeartStateStore.resetReceivedBeatCount(context);
 
             int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
             if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -90,7 +91,7 @@ public class HeartWidgetProvider extends AppWidgetProvider {
     }
 
     private static void applyBeatCount(Context context, RemoteViews views) {
-        int count = HeartStateStore.getLocalBeatCount(context);
+        int count = HeartStateStore.getReceivedBeatCount(context);
         String formattedCount = HeartStateStore.formatBeatCount(count);
 
         views.setTextViewText(R.id.beat_count_badge, formattedCount);

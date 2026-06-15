@@ -6,7 +6,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class HeartSettingsActivity extends Activity {
-    private TextView beatCountValue;
+    private TextView sentBeatCountValue;
+    private TextView receivedBeatCountValue;
     private TextView pairingValue;
 
     @Override
@@ -14,27 +15,43 @@ public class HeartSettingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heart_settings);
 
-        beatCountValue = findViewById(R.id.beat_count_value);
+        sentBeatCountValue = findViewById(R.id.sent_beat_count_value);
+        receivedBeatCountValue = findViewById(R.id.received_beat_count_value);
         pairingValue = findViewById(R.id.pairing_value);
-        Button addBeatButton = findViewById(R.id.add_beat_button);
-        Button addManyBeatsButton = findViewById(R.id.add_many_beats_button);
-        Button resetButton = findViewById(R.id.reset_count_button);
+        Button sendBeatButton = findViewById(R.id.send_beat_button);
+        Button simulateIncomingBeatButton = findViewById(R.id.simulate_incoming_beat_button);
+        Button simulateManyIncomingBeatsButton = findViewById(R.id.simulate_many_incoming_beats_button);
+        Button resetReceivedButton = findViewById(R.id.reset_received_count_button);
+        Button resetAllButton = findViewById(R.id.reset_all_counts_button);
         Button refreshButton = findViewById(R.id.refresh_widget_button);
 
-        addBeatButton.setOnClickListener(view -> {
-            HeartStateStore.incrementLocalBeatCount(this);
+        sendBeatButton.setOnClickListener(view -> {
+            HeartStateStore.incrementSentBeatCount(this);
+            HeartStateStore.resetReceivedBeatCount(this);
             HeartWidgetProvider.refreshAllWidgets(this);
             updateUi();
         });
 
-        addManyBeatsButton.setOnClickListener(view -> {
-            HeartStateStore.addLocalBeatCount(this, 1000);
+        simulateIncomingBeatButton.setOnClickListener(view -> {
+            HeartStateStore.incrementReceivedBeatCount(this);
             HeartWidgetProvider.refreshAllWidgets(this);
             updateUi();
         });
 
-        resetButton.setOnClickListener(view -> {
-            HeartStateStore.resetLocalBeatCount(this);
+        simulateManyIncomingBeatsButton.setOnClickListener(view -> {
+            HeartStateStore.addReceivedBeatCount(this, 1000);
+            HeartWidgetProvider.refreshAllWidgets(this);
+            updateUi();
+        });
+
+        resetReceivedButton.setOnClickListener(view -> {
+            HeartStateStore.resetReceivedBeatCount(this);
+            HeartWidgetProvider.refreshAllWidgets(this);
+            updateUi();
+        });
+
+        resetAllButton.setOnClickListener(view -> {
+            HeartStateStore.resetAllBeatCounts(this);
             HeartWidgetProvider.refreshAllWidgets(this);
             updateUi();
         });
@@ -54,9 +71,16 @@ public class HeartSettingsActivity extends Activity {
     }
 
     private void updateUi() {
-        int beatCount = HeartStateStore.getLocalBeatCount(this);
-        String formattedCount = HeartStateStore.formatBeatCount(beatCount);
-        beatCountValue.setText(getString(R.string.beat_count_display, beatCount, formattedCount.isEmpty() ? "0" : formattedCount));
+        int sentBeatCount = HeartStateStore.getSentBeatCount(this);
+        int receivedBeatCount = HeartStateStore.getReceivedBeatCount(this);
+
+        sentBeatCountValue.setText(formatBeatCountDisplay(sentBeatCount));
+        receivedBeatCountValue.setText(formatBeatCountDisplay(receivedBeatCount));
         pairingValue.setText(R.string.pairing_local_only);
+    }
+
+    private String formatBeatCountDisplay(int beatCount) {
+        String formattedCount = HeartStateStore.formatBeatCount(beatCount);
+        return getString(R.string.beat_count_display, beatCount, formattedCount.isEmpty() ? "0" : formattedCount);
     }
 }

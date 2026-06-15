@@ -28,6 +28,9 @@ Turn the widget into a paired "heart attention" experience:
 
 - [ ] Heartbeat attention counter
   - [x] Local offline counter prototype implemented.
+  - [x] Local sent/received beat counters implemented.
+  - [x] Widget badge shows received unread beats.
+  - [x] Tapping the local heart records a sent beat and clears received unread beats.
   - [ ] User A taps their own heart.
   - [ ] A counter accumulates for User B.
   - [ ] User B sees the count on or near their heart widget.
@@ -44,6 +47,7 @@ Turn the widget into a paired "heart attention" experience:
 ## Technical Notes
 
 - [x] Android widget and settings Activity can live in one APK.
+- [x] Local paired-counter semantics can be prototyped without a backend.
 - [ ] Cross-device state requires a backend or peer-to-peer transport.
 - [ ] For a first reliable version, use a small backend rather than direct peer-to-peer.
 - [ ] The widget should stay functional even when network is unavailable, then sync later.

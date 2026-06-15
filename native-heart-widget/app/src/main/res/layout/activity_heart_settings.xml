@@ -30,16 +30,34 @@
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/beat_count_label"
+            android:id="@+id/sent_beat_count_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="@string/local_beat_count"
+            android:text="@string/sent_beat_count"
             android:textColor="@color/settings_text_secondary"
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/beat_count_value"
+            android:id="@+id/sent_beat_count_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/settings_text_primary"
+            android:textSize="48sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/received_beat_count_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/received_beat_count"
+            android:textColor="@color/settings_text_secondary"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/received_beat_count_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -65,25 +83,39 @@
             android:textSize="18sp" />
 
         <Button
-            android:id="@+id/add_beat_button"
+            android:id="@+id/send_beat_button"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="32dp"
-            android:text="@string/add_test_beat" />
+            android:text="@string/send_test_beat" />
 
         <Button
-            android:id="@+id/add_many_beats_button"
+            android:id="@+id/simulate_incoming_beat_button"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="12dp"
-            android:text="@string/add_many_test_beats" />
+            android:text="@string/simulate_incoming_beat" />
 
         <Button
-            android:id="@+id/reset_count_button"
+            android:id="@+id/simulate_many_incoming_beats_button"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="12dp"
-            android:text="@string/reset_count" />
+            android:text="@string/simulate_many_incoming_beats" />
+
+        <Button
+            android:id="@+id/reset_received_count_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/reset_received_count" />
+
+        <Button
+            android:id="@+id/reset_all_counts_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/reset_all_counts" />
 
         <Button
             android:id="@+id/refresh_widget_button"

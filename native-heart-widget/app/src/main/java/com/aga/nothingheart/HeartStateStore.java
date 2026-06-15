@@ -5,27 +5,52 @@ import android.content.SharedPreferences;
 
 public final class HeartStateStore {
     private static final String PREFS_NAME = "heart_state";
-    private static final String KEY_LOCAL_BEAT_COUNT = "local_beat_count";
+    private static final String KEY_LEGACY_LOCAL_BEAT_COUNT = "local_beat_count";
+    private static final String KEY_LEGACY_LOCAL_BEAT_COUNT_MIGRATED = "local_beat_count_migrated";
+    private static final String KEY_SENT_BEAT_COUNT = "sent_beat_count";
+    private static final String KEY_RECEIVED_BEAT_COUNT = "received_beat_count";
 
     private HeartStateStore() {
     }
 
-    public static int getLocalBeatCount(Context context) {
-        return prefs(context).getInt(KEY_LOCAL_BEAT_COUNT, 0);
+    public static int getSentBeatCount(Context context) {
+        migrateLegacyLocalCount(context);
+        return prefs(context).getInt(KEY_SENT_BEAT_COUNT, 0);
     }
 
-    public static int incrementLocalBeatCount(Context context) {
-        return addLocalBeatCount(context, 1);
+    public static int getReceivedBeatCount(Context context) {
+        migrateLegacyLocalCount(context);
+        return prefs(context).getInt(KEY_RECEIVED_BEAT_COUNT, 0);
     }
 
-    public static int addLocalBeatCount(Context context, int amount) {
-        int nextCount = Math.max(0, getLocalBeatCount(context) + amount);
-        prefs(context).edit().putInt(KEY_LOCAL_BEAT_COUNT, nextCount).apply();
-        return nextCount;
+    public static int incrementSentBeatCount(Context context) {
+        return addSentBeatCount(context, 1);
     }
 
-    public static void resetLocalBeatCount(Context context) {
-        prefs(context).edit().putInt(KEY_LOCAL_BEAT_COUNT, 0).apply();
+    public static int addSentBeatCount(Context context, int amount) {
+        return addBeatCount(context, KEY_SENT_BEAT_COUNT, amount);
+    }
+
+    public static int incrementReceivedBeatCount(Context context) {
+        return addReceivedBeatCount(context, 1);
+    }
+
+    public static int addReceivedBeatCount(Context context, int amount) {
+        return addBeatCount(context, KEY_RECEIVED_BEAT_COUNT, amount);
+    }
+
+    public static void resetReceivedBeatCount(Context context) {
+        migrateLegacyLocalCount(context);
+        prefs(context).edit().putInt(KEY_RECEIVED_BEAT_COUNT, 0).apply();
+    }
+
+    public static void resetAllBeatCounts(Context context) {
+        prefs(context).edit()
+                .putInt(KEY_LEGACY_LOCAL_BEAT_COUNT, 0)
+                .putBoolean(KEY_LEGACY_LOCAL_BEAT_COUNT_MIGRATED, true)
+                .putInt(KEY_SENT_BEAT_COUNT, 0)
+                .putInt(KEY_RECEIVED_BEAT_COUNT, 0)
+                .apply();
     }
 
     public static String formatBeatCount(int count) {
@@ -58,6 +83,44 @@ public final class HeartStateStore {
             return whole + suffix;
         }
         return whole + "." + decimal + suffix;
+    }
+
+    private static int addBeatCount(Context context, String key, int amount) {
+        migrateLegacyLocalCount(context);
+
+        SharedPreferences preferences = prefs(context);
+        int currentCount = preferences.getInt(key, 0);
+        int nextCount = clampCount((long) currentCount + amount);
+
+        preferences.edit().putInt(key, nextCount).apply();
+        return nextCount;
+    }
+
+    private static int clampCount(long count) {
+        if (count <= 0) {
+            return 0;
+        }
+        if (count > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        return (int) count;
+    }
+
+    private static void migrateLegacyLocalCount(Context context) {
+        SharedPreferences preferences = prefs(context);
+        if (preferences.getBoolean(KEY_LEGACY_LOCAL_BEAT_COUNT_MIGRATED, false)) {
+            return;
+        }
+
+        int legacyCount = preferences.getInt(KEY_LEGACY_LOCAL_BEAT_COUNT, 0);
+        SharedPreferences.Editor editor = preferences.edit()
+                .putBoolean(KEY_LEGACY_LOCAL_BEAT_COUNT_MIGRATED, true);
+
+        if (legacyCount > 0 && !preferences.contains(KEY_RECEIVED_BEAT_COUNT)) {
+            editor.putInt(KEY_RECEIVED_BEAT_COUNT, legacyCount);
+        }
+
+        editor.apply();
     }
 
     private static SharedPreferences prefs(Context context) {

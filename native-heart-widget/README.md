@@ -9,8 +9,11 @@ Native Android home-screen widget prototype for a small paired-heart experience.
 - Transparent `2x2` widget surface.
 - Centered warm red PNG heart with a glassy convex highlight.
 - 10-frame heartbeat pulse by switching PNG frames through `RemoteViews`.
-- Local offline beat counter stored in `SharedPreferences`.
-- Compact counter badge on the widget: `1.2K`, `10K`, `999K`, `1.2M`, `99M+`.
+- Local offline sent/received beat counters stored in `SharedPreferences`.
+- Widget badge shows received unread beats.
+- Widget tap records a sent beat, clears received unread beats, and plays the heartbeat animation.
+- Compact counter badge formatting: `1.2K`, `10K`, `999K`, `1.2M`, `99M+`.
+- Settings app debug controls can send a local test beat and simulate incoming beats.
 - Minimum supported Android version: Android 6.0 / API 23.
 
 The heartbeat is implemented with pre-rendered `drawable-nodpi` PNG frames because Android home-screen widgets are not normal live Android views.
@@ -71,4 +74,3 @@ Do not commit local/build files:
 - `.gradle`
 - `app\build`
 - `local.properties`
-

@@ -6,21 +6,27 @@ Goal:
 
 - [x] Add a normal settings app / launcher Activity to the same APK.
 - [x] Add a local offline beat counter on one device.
+- [x] Split local state into sent beats and received unread beats.
 
 Implementation plan:
 
 - [x] Add `HeartSettingsActivity` as the launcher Activity.
-- [x] Store local beat count in `SharedPreferences`.
-- [x] Increment local beat count when the widget heart is tapped.
-- [x] Show the count as a small badge on the widget.
+- [x] Store beat counts in `SharedPreferences`.
+- [x] Migrate the old `local_beat_count` value into the new received count once.
+- [x] Increment sent beat count when the widget heart is tapped.
+- [x] Clear received unread beat count when the widget heart is tapped.
+- [x] Show the received unread count as a small badge on the widget.
 - [x] Add settings screen controls:
-  - [x] view current local count;
-  - [x] add test beat;
-  - [x] add 1000 test beats;
-  - [x] reset count;
+  - [x] view current sent count;
+  - [x] view current received unread count;
+  - [x] send test beat;
+  - [x] simulate incoming beat;
+  - [x] simulate 1000 incoming beats;
+  - [x] clear received beats;
+  - [x] reset all counts;
   - [x] refresh widgets.
 - [x] Coalesce rapid tap animations to avoid a long animation backlog.
-- [ ] Replace local-only semantics with paired-device semantics.
+- [x] Add local paired-device counter semantics without network.
 - [ ] Add backend-backed pairing.
 
 Status:
@@ -41,10 +47,12 @@ Notes:
 
 - [x] The settings app is a plain Android `Activity`, no external dependencies.
 - [x] Launcher icon uses a single smaller heart with generous dark breathing room inside the circular icon.
-- [x] Local count is stored in `SharedPreferences`.
-- [x] Widget tap increments the local count and plays the 10-frame heartbeat animation.
+- [x] Sent and received counts are stored in `SharedPreferences`.
+- [x] Widget badge uses the received unread count.
+- [x] Widget tap increments the sent count, clears the received unread count, and plays the 10-frame heartbeat animation.
 - [x] Rapid taps update the counter immediately and coalesce animation playback to one active pulse plus at most two queued pulses.
 - [x] The widget shows the count as a small white badge on the upper-right edge of the heart when the count is greater than zero.
 - [x] The badge is right-anchored so compact values like `10K` expand leftward instead of drifting right.
 - [x] Large counts are compacted for the badge: `1.2K`, `10K`, `999K`, `1.2M`, `99M+`.
-- [ ] This is still offline-only and does not represent the final paired-device semantics yet.
+- [x] The settings app can simulate incoming beats to test the widget badge without a backend.
+- [ ] This is still offline-only and does not sync with another device yet.
