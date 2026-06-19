@@ -83,6 +83,34 @@
             android:textSize="18sp" />
 
         <Button
+            android:id="@+id/create_identity_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/create_identity" />
+
+        <Button
+            android:id="@+id/simulate_pending_pairing_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/simulate_pending_pairing" />
+
+        <Button
+            android:id="@+id/simulate_paired_partner_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/simulate_paired_partner" />
+
+        <Button
+            android:id="@+id/reset_pairing_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/reset_pairing" />
+
+        <Button
             android:id="@+id/send_beat_button"
             android:layout_width="match_parent"
             android:layout_height="48dp"

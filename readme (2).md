@@ -59,8 +59,12 @@ Settings app:
 
 - Shows `Sent beats`.
 - Shows `Received unread beats`.
-- Pairing status is currently local-only placeholder.
+- Shows local pairing identity, pair code, and pairing status.
 - Buttons:
+  - create local identity;
+  - simulate pending pairing;
+  - simulate paired partner;
+  - reset pairing;
   - send test beat;
   - simulate incoming beat;
   - simulate 1000 incoming beats;
@@ -74,9 +78,14 @@ State:
 - Current keys include:
   - `sent_beat_count`;
   - `received_beat_count`;
+  - `my_user_id`;
+  - `pair_code`;
+  - `partner_id`;
+  - `pair_status`;
   - old `local_beat_count` migration flag/key.
 - Old `local_beat_count` migrates once into received count if present.
 - Counter formatting is in `HeartStateStore.formatBeatCount`.
+- Beat and pairing operations are accessed through `HeartRepository`.
 
 ## Important Files
 
@@ -171,14 +180,8 @@ Reasoning:
 
 Recommended next implementation step:
 
-- Add local pairing/sync model without network:
-  - `myUserId`;
-  - `pairCode`;
-  - `partnerId`;
-  - `pairStatus`: `none`, `pending`, `paired`.
-- Add a small local repository/adaptor layer:
-  - local implementation now;
-  - Firebase/Supabase/custom HTTP implementation later.
+- Build the real backend-backed pairing adapter after choosing the backend with the user.
+- Keep the current local repository implementation as the offline prototype and fallback shape.
 - Consider renaming semantics from `sent/received` toward backend-ready concepts:
   - `beatsForMe`;
   - `beatsForPartner`.

@@ -1,0 +1,48 @@
+package com.aga.nothingheart;
+
+public final class HeartPairingState {
+    private final String myUserId;
+    private final String pairCode;
+    private final String partnerId;
+    private final HeartPairingStatus pairStatus;
+
+    public HeartPairingState(
+            String myUserId,
+            String pairCode,
+            String partnerId,
+            HeartPairingStatus pairStatus
+    ) {
+        this.myUserId = nullToEmpty(myUserId);
+        this.pairCode = nullToEmpty(pairCode);
+        this.partnerId = nullToEmpty(partnerId);
+        this.pairStatus = pairStatus == null ? HeartPairingStatus.NONE : pairStatus;
+    }
+
+    public String getMyUserId() {
+        return myUserId;
+    }
+
+    public String getPairCode() {
+        return pairCode;
+    }
+
+    public String getPartnerId() {
+        return partnerId;
+    }
+
+    public HeartPairingStatus getPairStatus() {
+        return pairStatus;
+    }
+
+    public boolean hasLocalIdentity() {
+        return !myUserId.isEmpty() && !pairCode.isEmpty();
+    }
+
+    public boolean hasPartner() {
+        return !partnerId.isEmpty();
+    }
+
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value;
+    }
+}

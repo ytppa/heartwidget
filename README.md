@@ -10,6 +10,8 @@ Native Android home-screen widget prototype for a small paired-heart experience.
 - Centered warm red PNG heart with a glassy convex highlight.
 - 10-frame heartbeat pulse by switching PNG frames through `RemoteViews`.
 - Local offline sent/received beat counters stored in `SharedPreferences`.
+- Local-only identity and pairing state stored in `SharedPreferences`.
+- Backend-independent repository boundary around beat and pairing operations.
 - Widget badge shows received unread beats.
 - Widget tap records a sent beat, clears received unread beats, and plays the heartbeat animation.
 - Compact counter badge formatting: `1.2K`, `10K`, `999K`, `1.2M`, `99M+`.
@@ -23,6 +25,8 @@ The heartbeat is implemented with pre-rendered `drawable-nodpi` PNG frames becau
 - `app/src/main/java/com/aga/nothingheart/HeartWidgetProvider.java`
 - `app/src/main/java/com/aga/nothingheart/HeartSettingsActivity.java`
 - `app/src/main/java/com/aga/nothingheart/HeartStateStore.java`
+- `app/src/main/java/com/aga/nothingheart/HeartRepository.java`
+- `app/src/main/java/com/aga/nothingheart/LocalHeartRepository.java`
 - `tools/generate-heart-frames.ps1`
 - `DEVELOPMENT.md`
 - `ROADMAP.md`

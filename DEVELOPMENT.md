@@ -1,6 +1,48 @@
 # Development Log
 
-## Current Milestone: Local App + Counter
+## Current Milestone: Local Pairing Model
+
+Goal:
+
+- [x] Add local identity state with `myUserId`, `pairCode`, `partnerId`, and `pairStatus`.
+- [x] Add a backend-independent repository/adaptor boundary.
+- [x] Keep the first repository implementation local/offline-only.
+- [x] Show meaningful local pairing status in the settings Activity.
+- [x] Add local debug controls for pairing state.
+- [x] Keep existing widget behavior unchanged while the internal model evolves.
+- [ ] Add backend-backed pairing.
+
+Status:
+
+- [x] Implemented locally.
+- [ ] Built successfully in this flattened workspace.
+- [ ] Installed on a connected test device from this workspace.
+
+Files:
+
+- [x] `app/src/main/java/com/aga/nothingheart/HeartRepository.java`
+- [x] `app/src/main/java/com/aga/nothingheart/LocalHeartRepository.java`
+- [x] `app/src/main/java/com/aga/nothingheart/HeartPairingState.java`
+- [x] `app/src/main/java/com/aga/nothingheart/HeartPairingStatus.java`
+- [x] `app/src/main/java/com/aga/nothingheart/HeartRepositories.java`
+- [x] `app/src/main/java/com/aga/nothingheart/HeartStateStore.java`
+- [x] `app/src/main/java/com/aga/nothingheart/HeartSettingsActivity.java`
+- [x] `app/src/main/java/com/aga/nothingheart/HeartWidgetProvider.java`
+- [x] `app/src/main/res/layout/activity_heart_settings.xml`
+- [x] `app/src/main/res/values/strings.xml`
+
+Notes:
+
+- [x] Local identity is generated on demand and stored in `SharedPreferences`.
+- [x] Pair code is generated locally and displayed in the settings Activity.
+- [x] Pairing status supports `none`, `pending`, and `paired`.
+- [x] Local debug controls can create identity, simulate pending pairing, simulate paired partner, and reset pairing.
+- [x] Widget tap still records a sent beat, clears received unread beats, and plays the heartbeat animation.
+- [x] The repository boundary is transport-independent so a backend adapter can replace the local implementation later.
+- [ ] This is still offline-only and does not sync with another device yet.
+- [ ] Build is currently blocked in this copy until JDK / Android SDK tooling is restored.
+
+## Completed Milestone: Local App + Counter
 
 Goal:
 

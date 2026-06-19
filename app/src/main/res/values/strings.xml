@@ -7,8 +7,15 @@
     <string name="sent_beat_count">Sent beats</string>
     <string name="received_beat_count">Received unread beats</string>
     <string name="pairing_status">Pairing status</string>
-    <string name="pairing_local_only">Local-only mode, no partner connected yet</string>
+    <string name="pairing_state_missing">No local identity yet</string>
+    <string name="pairing_state_none">Local identity ready\nPair code: %1$s\nNo partner connected yet</string>
+    <string name="pairing_state_pending">Pairing request pending\nPair code: %1$s</string>
+    <string name="pairing_state_paired">Paired locally\nPair code: %1$s\nPartner: %2$s</string>
     <string name="beat_count_display">%1$d (%2$s)</string>
+    <string name="create_identity">Create local identity</string>
+    <string name="simulate_pending_pairing">Simulate pending pairing</string>
+    <string name="simulate_paired_partner">Simulate paired partner</string>
+    <string name="reset_pairing">Reset pairing</string>
     <string name="send_test_beat">Send test beat</string>
     <string name="simulate_incoming_beat">Simulate incoming beat</string>
     <string name="simulate_many_incoming_beats">Simulate 1000 incoming beats</string>

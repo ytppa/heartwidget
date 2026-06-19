@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class HeartSettingsActivity extends Activity {
+    private HeartRepository repository;
     private TextView sentBeatCountValue;
     private TextView receivedBeatCountValue;
     private TextView pairingValue;
@@ -15,9 +16,14 @@ public class HeartSettingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heart_settings);
 
+        repository = HeartRepositories.get(this);
         sentBeatCountValue = findViewById(R.id.sent_beat_count_value);
         receivedBeatCountValue = findViewById(R.id.received_beat_count_value);
         pairingValue = findViewById(R.id.pairing_value);
+        Button createIdentityButton = findViewById(R.id.create_identity_button);
+        Button simulatePendingPairingButton = findViewById(R.id.simulate_pending_pairing_button);
+        Button simulatePairedPartnerButton = findViewById(R.id.simulate_paired_partner_button);
+        Button resetPairingButton = findViewById(R.id.reset_pairing_button);
         Button sendBeatButton = findViewById(R.id.send_beat_button);
         Button simulateIncomingBeatButton = findViewById(R.id.simulate_incoming_beat_button);
         Button simulateManyIncomingBeatsButton = findViewById(R.id.simulate_many_incoming_beats_button);
@@ -25,33 +31,52 @@ public class HeartSettingsActivity extends Activity {
         Button resetAllButton = findViewById(R.id.reset_all_counts_button);
         Button refreshButton = findViewById(R.id.refresh_widget_button);
 
+        createIdentityButton.setOnClickListener(view -> {
+            repository.ensureLocalIdentity();
+            updateUi();
+        });
+
+        simulatePendingPairingButton.setOnClickListener(view -> {
+            repository.simulatePendingPairing();
+            updateUi();
+        });
+
+        simulatePairedPartnerButton.setOnClickListener(view -> {
+            repository.simulatePairedPartner();
+            updateUi();
+        });
+
+        resetPairingButton.setOnClickListener(view -> {
+            repository.resetPairing();
+            updateUi();
+        });
+
         sendBeatButton.setOnClickListener(view -> {
-            HeartStateStore.incrementSentBeatCount(this);
-            HeartStateStore.resetReceivedBeatCount(this);
+            repository.sendBeatToPartner();
             HeartWidgetProvider.refreshAllWidgets(this);
             updateUi();
         });
 
         simulateIncomingBeatButton.setOnClickListener(view -> {
-            HeartStateStore.incrementReceivedBeatCount(this);
+            repository.simulateIncomingBeat();
             HeartWidgetProvider.refreshAllWidgets(this);
             updateUi();
         });
 
         simulateManyIncomingBeatsButton.setOnClickListener(view -> {
-            HeartStateStore.addReceivedBeatCount(this, 1000);
+            repository.simulateIncomingBeats(1000);
             HeartWidgetProvider.refreshAllWidgets(this);
             updateUi();
         });
 
         resetReceivedButton.setOnClickListener(view -> {
-            HeartStateStore.resetReceivedBeatCount(this);
+            repository.clearReceivedBeats();
             HeartWidgetProvider.refreshAllWidgets(this);
             updateUi();
         });
 
         resetAllButton.setOnClickListener(view -> {
-            HeartStateStore.resetAllBeatCounts(this);
+            repository.resetAllBeatCounts();
             HeartWidgetProvider.refreshAllWidgets(this);
             updateUi();
         });
@@ -71,16 +96,34 @@ public class HeartSettingsActivity extends Activity {
     }
 
     private void updateUi() {
-        int sentBeatCount = HeartStateStore.getSentBeatCount(this);
-        int receivedBeatCount = HeartStateStore.getReceivedBeatCount(this);
+        int sentBeatCount = repository.getSentBeatCount();
+        int receivedBeatCount = repository.getReceivedBeatCount();
+        HeartPairingState pairingState = repository.getPairingState();
 
         sentBeatCountValue.setText(formatBeatCountDisplay(sentBeatCount));
         receivedBeatCountValue.setText(formatBeatCountDisplay(receivedBeatCount));
-        pairingValue.setText(R.string.pairing_local_only);
+        pairingValue.setText(formatPairingDisplay(pairingState));
     }
 
     private String formatBeatCountDisplay(int beatCount) {
         String formattedCount = HeartStateStore.formatBeatCount(beatCount);
         return getString(R.string.beat_count_display, beatCount, formattedCount.isEmpty() ? "0" : formattedCount);
+    }
+
+    private String formatPairingDisplay(HeartPairingState pairingState) {
+        if (!pairingState.hasLocalIdentity()) {
+            return getString(R.string.pairing_state_missing);
+        }
+        if (pairingState.getPairStatus() == HeartPairingStatus.PAIRED) {
+            return getString(
+                    R.string.pairing_state_paired,
+                    pairingState.getPairCode(),
+                    pairingState.getPartnerId()
+            );
+        }
+        if (pairingState.getPairStatus() == HeartPairingStatus.PENDING) {
+            return getString(R.string.pairing_state_pending, pairingState.getPairCode());
+        }
+        return getString(R.string.pairing_state_none, pairingState.getPairCode());
     }
 }

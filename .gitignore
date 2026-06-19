@@ -14,6 +14,10 @@ android-sdk/
 use-android-tools.ps1
 github toket.md.txt
 
+# Local working notes for Codex sessions.
+agents.md
+PLAN.md
+
 # OS/editor noise.
 .DS_Store
 Thumbs.db

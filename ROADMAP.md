@@ -15,16 +15,18 @@ Turn the widget into a paired "heart attention" experience:
 - [x] Settings app inside the same APK
   - [x] Implemented as local prototype.
   - [x] Openable launcher app.
-  - [x] Pairing status placeholder.
+  - [x] Local pairing status prototype.
   - [ ] Heart appearance settings.
   - [x] Debug / test tools while developing.
 
 - [ ] Pairing with one other device
-  - [ ] User gets or enters a simple connection ID.
+  - [x] User gets a local pair code in the offline prototype.
+  - [ ] User enters another person's connection ID.
   - [ ] User A sends a connect request to User B.
   - [ ] User B accepts or rejects.
   - [ ] Each heart can be connected to only one other heart.
-  - [ ] Unpair / reset pairing should be possible.
+  - [x] Local unpair / reset pairing prototype.
+  - [ ] Backend-backed unpair / reset pairing.
 
 - [ ] Heartbeat attention counter
   - [x] Local offline counter prototype implemented.
@@ -48,6 +50,8 @@ Turn the widget into a paired "heart attention" experience:
 
 - [x] Android widget and settings Activity can live in one APK.
 - [x] Local paired-counter semantics can be prototyped without a backend.
+- [x] Backend-independent repository/adaptor boundary exists.
+- [x] Local identity and pair status can be prototyped without a backend.
 - [ ] Cross-device state requires a backend or peer-to-peer transport.
 - [ ] For a first reliable version, use a small backend rather than direct peer-to-peer.
 - [ ] The widget should stay functional even when network is unavailable, then sync later.
