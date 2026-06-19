@@ -1,21 +1,18 @@
+.gradle/
+.idea/
+build/
+app/build/
+local.properties
+*.iml
+
 # Local Android/JDK/Gradle toolchain downloaded for this machine.
 .tools/
 android-sdk/
 .gradle-cache/
 
-# Local helper environment.
+# Local helper environment and secrets.
 use-android-tools.ps1
-
-# Old Playground prompt/assets package, not part of the native Android app.
-nothing-heart-widget/
-
-# Nested Android project outputs and local files.
-native-heart-widget/.gradle/
-native-heart-widget/.idea/
-native-heart-widget/build/
-native-heart-widget/app/build/
-native-heart-widget/local.properties
-native-heart-widget/*.iml
+github toket.md.txt
 
 # OS/editor noise.
 .DS_Store
