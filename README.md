@@ -16,6 +16,7 @@ Native Android home-screen widget prototype for a small paired-heart experience.
 - Optional Firebase-backed repository wrapper for anonymous Auth and Firestore writes when local `app/google-services.json` is present.
 - Firebase pairing sync can publish outgoing requests, check incoming requests by pair code, accept an incoming request, and detect accepted outgoing requests.
 - Firebase beat delivery increments the paired partner's unread count; the receiving device pulls it when the app opens, refreshes, or runs `Sync pairing`.
+- FCM client wiring saves each device push token and can refresh the widget when a silent `heart_beat` data push arrives.
 - Widget badge shows received unread beats.
 - Widget tap records a sent beat, clears received unread beats, and plays the heartbeat animation.
 - Compact counter badge formatting: `1.2K`, `10K`, `999K`, `1.2M`, `99M+`.
@@ -32,6 +33,9 @@ The heartbeat is implemented with pre-rendered `drawable-nodpi` PNG frames becau
 - `app/src/main/java/com/ytppa/nothingheart/HeartRepository.java`
 - `app/src/main/java/com/ytppa/nothingheart/LocalHeartRepository.java`
 - `app/src/main/java/com/ytppa/nothingheart/FirebaseHeartRepository.java`
+- `app/src/main/java/com/ytppa/nothingheart/HeartFirebaseMessagingService.java`
+- `functions/index.js`
+- `firebase.json`
 - `firestore.rules`
 - `tools/generate-heart-frames.ps1`
 - `DEVELOPMENT.md`
@@ -88,6 +92,20 @@ firestore.rules
 ```
 
 Publish those rules from Firebase Console after every rules change.
+
+Silent widget refresh uses Firebase Cloud Messaging plus a Cloud Function:
+
+```text
+functions/index.js
+```
+
+The function watches `users/{userId}` and sends a `heart_beat` data push when `receivedUnreadBeatCount` increases. Deploy it after Firebase CLI login/project setup:
+
+```powershell
+firebase deploy --only functions,firestore:rules
+```
+
+Cloud Functions deployment may require enabling the Blaze plan in Firebase.
 
 ## Regenerate Heart Frames
 

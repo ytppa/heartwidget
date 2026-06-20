@@ -19,6 +19,10 @@ public interface HeartRepository {
 
     HeartPairingState ensureLocalIdentity();
 
+    void syncPushToken();
+
+    void syncPushToken(String token);
+
     HeartPairingState requestPairing(String partnerPairCode);
 
     void syncPairing(PairingSyncCallback callback);

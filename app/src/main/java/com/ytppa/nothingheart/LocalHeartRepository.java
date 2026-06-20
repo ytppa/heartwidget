@@ -56,6 +56,16 @@ final class LocalHeartRepository implements HeartRepository {
     }
 
     @Override
+    public void syncPushToken() {
+        // Local repository has no remote push token to sync.
+    }
+
+    @Override
+    public void syncPushToken(String token) {
+        // Local repository has no remote push token to sync.
+    }
+
+    @Override
     public HeartPairingState requestPairing(String partnerPairCode) {
         return HeartStateStore.setPairingPending(context, partnerPairCode);
     }

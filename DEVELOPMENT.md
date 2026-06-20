@@ -53,8 +53,11 @@ Notes:
 - [x] Fixed the partner beat write path after `PERMISSION_DENIED`: rules now validate an accepted pair request before allowing a paired device to increment the partner unread count.
 - [x] `Sync pairing` and beat send now restore `partner_remote_user_id` from an accepted pair request when an older local paired state only has `local-partner-*`.
 - [x] Settings refresh / resume / pairing sync pull remote `receivedUnreadBeatCount` into local state and refresh widgets.
+- [x] FCM client wiring added: the app saves `fcmToken`, receives silent `heart_beat` data pushes, pulls received beats, and refreshes widgets.
+- [x] Cloud Function source added in `functions/index.js` to send `heart_beat` pushes when `receivedUnreadBeatCount` increases.
+- [ ] Deploy Firebase Functions and re-test automatic widget refresh on two phones.
 - [ ] Republish `firestore.rules` after the paired-partner beat delivery rule update.
-- [ ] Received beat updates are pull-based until FCM/widget refresh triggers are added.
+- [ ] Received beat updates are still pull-based in production until the Cloud Function is deployed.
 - [ ] Full cross-device sync is not complete yet: pairing and beat delivery have Firestore paths, but received badge refresh is still pull-based.
 - [x] Local JDK / Android SDK tooling was restored in ignored project-local folders.
 

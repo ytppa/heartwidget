@@ -15,6 +15,9 @@ use-android-tools.ps1
 github toket.md.txt
 app/google-services.json
 
+# Firebase Functions dependencies.
+functions/node_modules/
+
 # Local working notes for Codex sessions.
 agents.md
 PLAN.md

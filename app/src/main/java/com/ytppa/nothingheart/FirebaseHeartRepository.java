@@ -3,13 +3,16 @@ package com.ytppa.nothingheart;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,12 +23,14 @@ final class FirebaseHeartRepository implements HeartRepository {
     private static final String COLLECTION_PAIR_CODES = "pairCodes";
     private static final String COLLECTION_PAIR_REQUESTS = "pairRequests";
     private static final String COLLECTION_INCOMING_PAIR_REQUESTS = "incomingPairRequests";
+    private static final Object SIGN_IN_LOCK = new Object();
 
     private final LocalHeartRepository localRepository;
     private final FirebaseAuth auth;
     private final FirebaseFirestore firestore;
     private final boolean firebaseReady;
     private final Context context;
+    private static Task<AuthResult> signInTask;
 
     FirebaseHeartRepository(Context context) {
         Context appContext = context.getApplicationContext();
@@ -60,7 +65,7 @@ final class FirebaseHeartRepository implements HeartRepository {
             data.put("receivedUnreadBeatCount", 0);
             data.put("lastSentBeatAt", FieldValue.serverTimestamp());
             data.put("updatedAt", FieldValue.serverTimestamp());
-            com.google.android.gms.tasks.Task<Void> ownWrite = firestore.collection(COLLECTION_USERS)
+            Task<Void> ownWrite = firestore.collection(COLLECTION_USERS)
                     .document(user.getUid())
                     .set(data, SetOptions.merge());
             logTask("sent beat count write", ownWrite);
@@ -102,7 +107,38 @@ final class FirebaseHeartRepository implements HeartRepository {
     public HeartPairingState ensureLocalIdentity() {
         HeartPairingState state = localRepository.ensureLocalIdentity();
         syncPairingState(state);
+        syncPushToken();
         return state;
+    }
+
+    @Override
+    public void syncPushToken() {
+        if (!firebaseReady) {
+            return;
+        }
+
+        FirebaseMessaging.getInstance()
+                .getToken()
+                .addOnSuccessListener(this::syncPushToken)
+                .addOnFailureListener(exception -> Log.w(TAG, "Firebase FCM token read failed.", exception));
+    }
+
+    @Override
+    public void syncPushToken(String token) {
+        if (!firebaseReady || isBlank(token)) {
+            return;
+        }
+
+        withSignedInUser(user -> {
+            Map<String, Object> data = new HashMap<>();
+            data.put("fcmToken", token);
+            data.put("fcmTokenUpdatedAt", FieldValue.serverTimestamp());
+            data.put("updatedAt", FieldValue.serverTimestamp());
+
+            logTask("FCM token write", firestore.collection(COLLECTION_USERS)
+                    .document(user.getUid())
+                    .set(data, SetOptions.merge()));
+        });
     }
 
     @Override
@@ -527,7 +563,15 @@ final class FirebaseHeartRepository implements HeartRepository {
             return;
         }
 
-        auth.signInAnonymously()
+        Task<AuthResult> activeSignInTask;
+        synchronized (SIGN_IN_LOCK) {
+            if (signInTask == null || signInTask.isComplete()) {
+                signInTask = auth.signInAnonymously();
+            }
+            activeSignInTask = signInTask;
+        }
+
+        activeSignInTask
                 .addOnSuccessListener(result -> {
                     FirebaseUser user = result.getUser();
                     if (user != null) {
@@ -543,7 +587,7 @@ final class FirebaseHeartRepository implements HeartRepository {
                 });
     }
 
-    private void logTask(String label, com.google.android.gms.tasks.Task<?> task) {
+    private void logTask(String label, Task<?> task) {
         task.addOnSuccessListener(unused -> Log.d(TAG, "Firebase " + label + " succeeded."))
                 .addOnFailureListener(exception -> Log.w(TAG, "Firebase " + label + " failed.", exception));
     }

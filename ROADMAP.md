@@ -38,6 +38,8 @@ Turn the widget into a paired "heart attention" experience:
   - [x] User A taps their own heart and writes an unread beat to paired User B in Firestore.
   - [x] A counter accumulates for User B in Firestore.
   - [x] User B can pull the count into the local widget badge.
+  - [x] Android app can receive a silent FCM data push and refresh the widget badge.
+  - [ ] Deploy and test the Cloud Function that sends the push after the Firestore counter increases.
   - [ ] When User B taps their own heart:
     - [ ] User B's received counter resets;
     - [ ] User A starts accumulating a received counter.
@@ -70,13 +72,14 @@ Current decision state:
 - [x] Backend request exchange has a first Firestore-backed path through `pairRequests` and `incomingPairRequests`.
 - [x] Firebase writes passed a real-device smoke test on Mi A3 after phone DNS/network was restored.
 - [x] Firebase beat delivery writes unread beats to the paired partner document.
-- [ ] Received beat refresh is pull-based for now; add FCM later for near-immediate widget refresh.
+- [ ] Received beat refresh has FCM client/function source, but automatic widget refresh still needs function deployment and two-phone testing.
 
 Selected first option:
 
 - [x] Firebase Authentication with anonymous users.
 - [x] Cloud Firestore for pairing and counters.
-- [ ] Firebase Cloud Messaging for optional push nudges / widget refresh triggers.
+- [x] Firebase Cloud Messaging client wiring for widget refresh triggers.
+- [ ] Firebase Cloud Functions deployment for sending widget refresh triggers.
 
 Alternatives:
 

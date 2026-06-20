@@ -25,6 +25,7 @@ public class HeartSettingsActivity extends Activity {
         setContentView(R.layout.activity_heart_settings);
 
         repository = HeartRepositories.get(this);
+        repository.syncPushToken();
         sentBeatCountValue = findViewById(R.id.sent_beat_count_value);
         receivedBeatCountValue = findViewById(R.id.received_beat_count_value);
         pairingValue = findViewById(R.id.pairing_value);

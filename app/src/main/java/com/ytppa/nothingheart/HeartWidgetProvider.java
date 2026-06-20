@@ -34,6 +34,7 @@ public class HeartWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        HeartRepositories.get(context).syncPushToken();
         for (int appWidgetId : appWidgetIds) {
             updateWidget(context, appWidgetManager, appWidgetId, DEFAULT_HEART_FRAME_RES_ID);
         }
