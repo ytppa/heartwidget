@@ -15,8 +15,8 @@ Goal:
 Status:
 
 - [x] Implemented locally.
-- [ ] Built successfully in this flattened workspace.
-- [ ] Installed on a connected test device from this workspace.
+- [x] Built successfully in this flattened workspace.
+- [x] Installed on a connected test device from this workspace.
 
 Files:
 
@@ -37,10 +37,11 @@ Notes:
 - [x] Pair code is generated locally and displayed in the settings Activity.
 - [x] Pairing status supports `none`, `pending`, and `paired`.
 - [x] Local debug controls can create identity, simulate pending pairing, simulate paired partner, and reset pairing.
+- [x] Installed APK was opened on connected Mi A3 and the local pairing UI was verified through create identity, pending, paired, and reset states.
 - [x] Widget tap still records a sent beat, clears received unread beats, and plays the heartbeat animation.
 - [x] The repository boundary is transport-independent so a backend adapter can replace the local implementation later.
 - [ ] This is still offline-only and does not sync with another device yet.
-- [ ] Build is currently blocked in this copy until JDK / Android SDK tooling is restored.
+- [x] Local JDK / Android SDK tooling was restored in ignored project-local folders.
 
 ## Completed Milestone: Local App + Counter
 
