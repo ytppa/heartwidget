@@ -60,7 +60,8 @@ Notes:
 - [x] Supabase Free path started: Anonymous Auth was enabled manually, and Postgres tables/RLS/RPC functions were created successfully from SQL Editor.
 - [x] Supabase SQL contract is tracked in `supabase/schema.sql`.
 - [x] Android build now supports local Supabase configuration through ignored `local.properties` keys: `supabase.url` and `supabase.anonKey`.
-- [ ] Next implementation step: add an Android Supabase repository adapter behind `HeartRepository`.
+- [x] First Android Supabase repository adapter is implemented behind `HeartRepository` and gated by local Supabase configuration.
+- [ ] Next implementation step: add local Supabase URL/key, smoke-test anonymous sign-in and RPC calls on a phone.
 - [ ] Re-test automatic widget refresh on two phones after the custom backend bridge is deployed.
 - [ ] Republish `firestore.rules` after the paired-partner beat delivery rule update.
 - [ ] Received beat updates are still pull-based in production until a push sender is deployed.

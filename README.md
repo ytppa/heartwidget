@@ -128,6 +128,8 @@ supabase.url=
 supabase.anonKey=
 ```
 
+When both values are present, `HeartRepositories` selects the Supabase repository. When either value is missing, the app keeps using the current Firebase repository.
+
 ## Regenerate Heart Frames
 
 ```powershell

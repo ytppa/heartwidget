@@ -65,6 +65,13 @@ public final class HeartStateStore {
         return nextCount;
     }
 
+    public static int setSentBeatCount(Context context, int count) {
+        migrateLegacyLocalCount(context);
+        int nextCount = clampCount(count);
+        prefs(context).edit().putInt(KEY_SENT_BEAT_COUNT, nextCount).apply();
+        return nextCount;
+    }
+
     public static void resetAllBeatCounts(Context context) {
         prefs(context).edit()
                 .putInt(KEY_LEGACY_LOCAL_BEAT_COUNT, 0)
@@ -191,6 +198,58 @@ public final class HeartStateStore {
                 .remove(KEY_PARTNER_REMOTE_USER_ID)
                 .remove(KEY_PAIR_REQUEST_ID)
                 .apply();
+        return readPairingState(preferences);
+    }
+
+    public static HeartPairingState setRemotePairingState(
+            Context context,
+            String pairCode,
+            String partnerPairCode,
+            String partnerRemoteUserId,
+            String pairRequestId,
+            HeartPairingStatus pairStatus
+    ) {
+        SharedPreferences preferences = prefs(context);
+        ensureLocalIdentityExists(preferences);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        String normalizedPairCode = normalizePairCode(pairCode);
+        if (isValidPairCode(normalizedPairCode)) {
+            editor.putString(KEY_PAIR_CODE, normalizedPairCode);
+        }
+
+        if (pairStatus == HeartPairingStatus.NONE) {
+            editor.putString(KEY_PAIR_STATUS, HeartPairingStatus.NONE.getStoredValue())
+                    .remove(KEY_PARTNER_ID)
+                    .remove(KEY_PARTNER_PAIR_CODE)
+                    .remove(KEY_PARTNER_REMOTE_USER_ID)
+                    .remove(KEY_PAIR_REQUEST_ID)
+                    .apply();
+            return readPairingState(preferences);
+        }
+
+        String normalizedPartnerPairCode = normalizePairCode(partnerPairCode);
+        if (!isValidPairCode(normalizedPartnerPairCode)) {
+            editor.apply();
+            return readPairingState(preferences);
+        }
+
+        editor.putString(KEY_PAIR_STATUS, pairStatus.getStoredValue())
+                .putString(KEY_PARTNER_PAIR_CODE, normalizedPartnerPairCode)
+                .putString(KEY_PARTNER_REMOTE_USER_ID, nullToEmpty(partnerRemoteUserId))
+                .putString(KEY_PAIR_REQUEST_ID, nullToEmpty(pairRequestId));
+
+        if (pairStatus == HeartPairingStatus.PAIRED) {
+            String remotePartnerId = nullToEmpty(partnerRemoteUserId);
+            editor.putString(
+                    KEY_PARTNER_ID,
+                    isBlank(remotePartnerId) ? buildLocalPartnerId(normalizedPartnerPairCode) : remotePartnerId
+            );
+        } else {
+            editor.remove(KEY_PARTNER_ID);
+        }
+
+        editor.apply();
         return readPairingState(preferences);
     }
 

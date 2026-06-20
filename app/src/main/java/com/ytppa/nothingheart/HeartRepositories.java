@@ -7,6 +7,9 @@ public final class HeartRepositories {
     }
 
     public static HeartRepository get(Context context) {
+        if (SupabaseConfig.isConfigured()) {
+            return new SupabaseHeartRepository(context);
+        }
         return new FirebaseHeartRepository(context);
     }
 }
