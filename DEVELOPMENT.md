@@ -93,6 +93,7 @@ Notes:
 - [x] Sent and received counts are stored in `SharedPreferences`.
 - [x] Widget badge uses the received unread count.
 - [x] Widget tap increments the sent count, clears the received unread count, and plays the 10-frame heartbeat animation.
+- [x] Heartbeat animation timing was shortened from about 660 ms to about 420 ms for a faster pulse.
 - [x] Rapid taps update the counter immediately and coalesce animation playback to one active pulse plus at most two queued pulses.
 - [x] The widget shows the count as a small white badge on the upper-right edge of the heart when the count is greater than zero.
 - [x] The badge is right-anchored so compact values like `10K` expand leftward instead of drifting right.

@@ -24,7 +24,7 @@ public class HeartWidgetProvider extends AppWidgetProvider {
             R.drawable.heart_08,
             R.drawable.heart_09
     };
-    private static final int[] HEARTBEAT_DELAY_MS = {0, 45, 55, 65, 85, 70, 70, 75, 85, 110};
+    private static final int[] HEARTBEAT_DELAY_MS = {0, 30, 35, 40, 50, 45, 45, 50, 55, 70};
     private static final int DEFAULT_HEART_FRAME_RES_ID = R.drawable.heart_00;
     private static final int MAX_QUEUED_PULSES = 2;
     private static final Object ANIMATION_LOCK = new Object();
