@@ -47,8 +47,8 @@ Notes:
 - [x] `syncPairing` can detect incoming requests via `incomingPairRequests/{pairCode}` and can detect accepted outgoing requests via `pairRequests/{requestId}`.
 - [x] `app/google-services.json` is ignored by Git and used only for local Firebase builds.
 - [x] Starter Firestore rules are tracked in `firestore.rules`.
-- [ ] Firebase smoke test on Mi A3 reached the repository path but anonymous sign-in failed while the phone could not resolve `firebase.google.com`.
-- [ ] Republish `firestore.rules` in Firebase Console after the `incomingPairRequests` rules update.
+- [x] Firebase smoke test on Mi A3 succeeded after phone DNS/network was restored: `users`, `pairCodes`, `pairRequests`, and `incomingPairRequests` writes were accepted.
+- [x] Updated `firestore.rules` were published in Firebase Console after the `incomingPairRequests` rules update.
 - [ ] This is still offline-only and does not sync with another device yet.
 - [x] Local JDK / Android SDK tooling was restored in ignored project-local folders.
 

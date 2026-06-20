@@ -57,7 +57,7 @@ final class FirebaseHeartRepository implements HeartRepository {
             data.put("receivedUnreadBeatCount", 0);
             data.put("lastSentBeatAt", FieldValue.serverTimestamp());
             data.put("updatedAt", FieldValue.serverTimestamp());
-            logFailures(firestore.collection(COLLECTION_USERS).document(user.getUid()).set(data, SetOptions.merge()));
+            logTask("sent beat count write", firestore.collection(COLLECTION_USERS).document(user.getUid()).set(data, SetOptions.merge()));
         });
     }
 
@@ -167,7 +167,7 @@ final class FirebaseHeartRepository implements HeartRepository {
         }
 
         withSignedInUser(user -> {
-            logFailures(firestore.collection(COLLECTION_USERS)
+            logTask("user pairing state write", firestore.collection(COLLECTION_USERS)
                     .document(user.getUid())
                     .set(buildUserData(state), SetOptions.merge()));
 
@@ -176,7 +176,7 @@ final class FirebaseHeartRepository implements HeartRepository {
             pairCodeData.put("ownerLocalUserId", state.getMyUserId());
             pairCodeData.put("updatedAt", FieldValue.serverTimestamp());
 
-            logFailures(firestore.collection(COLLECTION_PAIR_CODES)
+            logTask("pair code write", firestore.collection(COLLECTION_PAIR_CODES)
                     .document(state.getPairCode())
                     .set(pairCodeData, SetOptions.merge()));
         });
@@ -227,7 +227,7 @@ final class FirebaseHeartRepository implements HeartRepository {
                 data.put("createdAt", FieldValue.serverTimestamp());
             }
 
-            logFailures(firestore.collection(COLLECTION_PAIR_REQUESTS)
+            logTask("pair request write", firestore.collection(COLLECTION_PAIR_REQUESTS)
                     .document(pairRequestId)
                     .set(data, SetOptions.merge()));
 
@@ -242,7 +242,7 @@ final class FirebaseHeartRepository implements HeartRepository {
                 incomingData.put("updatedAt", FieldValue.serverTimestamp());
                 incomingData.put("createdAt", FieldValue.serverTimestamp());
 
-                logFailures(firestore.collection(COLLECTION_INCOMING_PAIR_REQUESTS)
+                logTask("incoming pair request write", firestore.collection(COLLECTION_INCOMING_PAIR_REQUESTS)
                         .document(state.getPartnerPairCode())
                         .set(incomingData, SetOptions.merge()));
             }
@@ -328,13 +328,13 @@ final class FirebaseHeartRepository implements HeartRepository {
             data.put("updatedAt", FieldValue.serverTimestamp());
             data.put("acceptedAt", FieldValue.serverTimestamp());
 
-            logFailures(firestore.collection(COLLECTION_PAIR_REQUESTS)
+            logTask("pair request accept write", firestore.collection(COLLECTION_PAIR_REQUESTS)
                     .document(state.getPairRequestId())
                     .set(data, SetOptions.merge()));
 
             Map<String, Object> incomingData = new HashMap<>(data);
             incomingData.put("requestId", state.getPairRequestId());
-            logFailures(firestore.collection(COLLECTION_INCOMING_PAIR_REQUESTS)
+            logTask("incoming pair request accept write", firestore.collection(COLLECTION_INCOMING_PAIR_REQUESTS)
                     .document(state.getPairCode())
                     .set(incomingData, SetOptions.merge()));
         });
@@ -350,7 +350,7 @@ final class FirebaseHeartRepository implements HeartRepository {
             data.put("sentBeatCount", getSentBeatCount());
             data.put("receivedUnreadBeatCount", getReceivedBeatCount());
             data.put("updatedAt", FieldValue.serverTimestamp());
-            logFailures(firestore.collection(COLLECTION_USERS).document(user.getUid()).set(data, SetOptions.merge()));
+            logTask("beat count sync write", firestore.collection(COLLECTION_USERS).document(user.getUid()).set(data, SetOptions.merge()));
         });
     }
 
@@ -385,8 +385,9 @@ final class FirebaseHeartRepository implements HeartRepository {
                 });
     }
 
-    private void logFailures(com.google.android.gms.tasks.Task<?> task) {
-        task.addOnFailureListener(exception -> Log.w(TAG, "Firebase write failed.", exception));
+    private void logTask(String label, com.google.android.gms.tasks.Task<?> task) {
+        task.addOnSuccessListener(unused -> Log.d(TAG, "Firebase " + label + " succeeded."))
+                .addOnFailureListener(exception -> Log.w(TAG, "Firebase " + label + " failed.", exception));
     }
 
     private interface FirebaseUserConsumer {

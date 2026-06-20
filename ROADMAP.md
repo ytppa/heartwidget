@@ -68,7 +68,7 @@ Current decision state:
 - [x] The code keeps `LocalHeartRepository` available as the offline fallback.
 - [x] Firestore rules starter file is tracked as `firestore.rules`.
 - [x] Backend request exchange has a first Firestore-backed path through `pairRequests` and `incomingPairRequests`.
-- [ ] Firebase writes still need a real-device network pass after phone DNS/network is working.
+- [x] Firebase writes passed a real-device smoke test on Mi A3 after phone DNS/network was restored.
 
 Selected first option:
 
