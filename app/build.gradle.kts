@@ -1,5 +1,23 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
+}
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { stream ->
+        localProperties.load(stream)
+    }
+}
+
+fun buildConfigString(propertyName: String): String {
+    val value = localProperties.getProperty(propertyName, "")
+    val escaped = value
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+    return "\"$escaped\""
 }
 
 if (file("google-services.json").exists()) {
@@ -16,6 +34,13 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+
+        buildConfigField("String", "SUPABASE_URL", buildConfigString("supabase.url"))
+        buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString("supabase.anonKey"))
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 }
 

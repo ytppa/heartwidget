@@ -121,6 +121,13 @@ supabase\schema.sql
 
 It creates the Postgres tables, RLS policies, and RPC functions for anonymous profiles, pair codes, pair requests, pairs, counters, and beat events. Run it from Supabase SQL Editor after creating the project and enabling Anonymous Sign-ins.
 
+Android reads local Supabase settings from ignored `local.properties`:
+
+```properties
+supabase.url=
+supabase.anonKey=
+```
+
 ## Regenerate Heart Frames
 
 ```powershell

@@ -2,3 +2,9 @@
 ## Example:
 ## sdk.dir=C\:\\Users\\AGA\\AppData\\Local\\Android\\Sdk
 
+## Optional Supabase prototype configuration.
+## Values are copied into BuildConfig at build time and local.properties is ignored by Git.
+## Supabase Project Settings -> API -> Project URL
+supabase.url=
+## Supabase Project Settings -> API -> Project API keys -> anon public
+supabase.anonKey=
