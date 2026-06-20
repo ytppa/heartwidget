@@ -12,6 +12,8 @@ Turn the widget into a paired "heart attention" experience:
 
 ## Wishlist
 
+Longer-range ideas that are not in the active milestone are kept in `BACKLOG.md`.
+
 - [x] Settings app inside the same APK
   - [x] Implemented as local prototype.
   - [x] Openable launcher app.

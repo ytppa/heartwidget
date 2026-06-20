@@ -40,6 +40,7 @@ The heartbeat is implemented with pre-rendered `drawable-nodpi` PNG frames becau
 - `tools/generate-heart-frames.ps1`
 - `DEVELOPMENT.md`
 - `ROADMAP.md`
+- `BACKLOG.md`
 
 ## Build
 
