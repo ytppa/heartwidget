@@ -52,12 +52,25 @@ final class FirebaseHeartRepository implements HeartRepository {
     public void sendBeatToPartner() {
         localRepository.sendBeatToPartner();
         withSignedInUser(user -> {
+            HeartPairingState pairingState = localRepository.getPairingState();
+
             Map<String, Object> data = new HashMap<>();
             data.put("sentBeatCount", FieldValue.increment(1));
             data.put("receivedUnreadBeatCount", 0);
             data.put("lastSentBeatAt", FieldValue.serverTimestamp());
             data.put("updatedAt", FieldValue.serverTimestamp());
             logTask("sent beat count write", firestore.collection(COLLECTION_USERS).document(user.getUid()).set(data, SetOptions.merge()));
+
+            if (pairingState.getPairStatus() == HeartPairingStatus.PAIRED && pairingState.hasPartnerRemoteUserId()) {
+                Map<String, Object> partnerData = new HashMap<>();
+                partnerData.put("receivedUnreadBeatCount", FieldValue.increment(1));
+                partnerData.put("lastReceivedBeatAt", FieldValue.serverTimestamp());
+                partnerData.put("updatedAt", FieldValue.serverTimestamp());
+
+                logTask("partner received beat write", firestore.collection(COLLECTION_USERS)
+                        .document(pairingState.getPartnerRemoteUserId())
+                        .set(partnerData, SetOptions.merge()));
+            }
         });
     }
 
@@ -130,6 +143,31 @@ final class FirebaseHeartRepository implements HeartRepository {
     }
 
     @Override
+    public void syncReceivedBeats(BeatSyncCallback callback) {
+        if (!firebaseReady) {
+            notifyBeatSyncComplete(callback, localRepository.getReceivedBeatCount(), false);
+            return;
+        }
+
+        withSignedInUser(user -> firestore.collection(COLLECTION_USERS)
+                .document(user.getUid())
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (!document.exists()) {
+                        notifyBeatSyncComplete(callback, localRepository.getReceivedBeatCount(), false);
+                        return;
+                    }
+
+                    Long remoteCount = document.getLong("receivedUnreadBeatCount");
+                    int nextCount = remoteCount == null ? 0 : clampRemoteCount(remoteCount);
+                    int currentCount = localRepository.getReceivedBeatCount();
+                    HeartStateStore.setReceivedBeatCount(context, nextCount);
+                    notifyBeatSyncComplete(callback, nextCount, nextCount != currentCount);
+                })
+                .addOnFailureListener(exception -> notifyBeatSyncFailed(callback, exception)), exception -> notifyBeatSyncFailed(callback, exception));
+    }
+
+    @Override
     public HeartPairingState completeLocalPairing() {
         HeartPairingState previousState = localRepository.getPairingState();
         HeartPairingState state = localRepository.completeLocalPairing();
@@ -187,8 +225,6 @@ final class FirebaseHeartRepository implements HeartRepository {
         data.put("localUserId", state.getMyUserId());
         data.put("pairCode", state.getPairCode());
         data.put("pairStatus", state.getPairStatus().getStoredValue());
-        data.put("sentBeatCount", getSentBeatCount());
-        data.put("receivedUnreadBeatCount", getReceivedBeatCount());
         data.put("updatedAt", FieldValue.serverTimestamp());
 
         if (state.hasPartnerPairCode()) {
@@ -354,6 +390,16 @@ final class FirebaseHeartRepository implements HeartRepository {
         });
     }
 
+    private int clampRemoteCount(long count) {
+        if (count <= 0) {
+            return 0;
+        }
+        if (count > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        return (int) count;
+    }
+
     private void withSignedInUser(FirebaseUserConsumer consumer) {
         withSignedInUser(consumer, null);
     }
@@ -407,6 +453,18 @@ final class FirebaseHeartRepository implements HeartRepository {
     private void notifySyncFailed(PairingSyncCallback callback, Exception exception) {
         if (callback != null) {
             callback.onPairingSyncFailed(exception);
+        }
+    }
+
+    private void notifyBeatSyncComplete(BeatSyncCallback callback, int receivedBeatCount, boolean changed) {
+        if (callback != null) {
+            callback.onBeatSyncComplete(receivedBeatCount, changed);
+        }
+    }
+
+    private void notifyBeatSyncFailed(BeatSyncCallback callback, Exception exception) {
+        if (callback != null) {
+            callback.onBeatSyncFailed(exception);
         }
     }
 

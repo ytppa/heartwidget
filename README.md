@@ -15,6 +15,7 @@ Native Android home-screen widget prototype for a small paired-heart experience.
 - Backend-independent repository boundary around beat and pairing operations.
 - Optional Firebase-backed repository wrapper for anonymous Auth and Firestore writes when local `app/google-services.json` is present.
 - Firebase pairing sync can publish outgoing requests, check incoming requests by pair code, accept an incoming request, and detect accepted outgoing requests.
+- Firebase beat delivery increments the paired partner's unread count; the receiving device pulls it when the app opens, refreshes, or runs `Sync pairing`.
 - Widget badge shows received unread beats.
 - Widget tap records a sent beat, clears received unread beats, and plays the heartbeat animation.
 - Compact counter badge formatting: `1.2K`, `10K`, `999K`, `1.2M`, `99M+`.

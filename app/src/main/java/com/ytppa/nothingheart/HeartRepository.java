@@ -23,6 +23,8 @@ public interface HeartRepository {
 
     void syncPairing(PairingSyncCallback callback);
 
+    void syncReceivedBeats(BeatSyncCallback callback);
+
     HeartPairingState completeLocalPairing();
 
     HeartPairingState resetPairing();

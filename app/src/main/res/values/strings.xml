@@ -24,6 +24,9 @@
     <string name="pairing_sync_changed">Pairing updated</string>
     <string name="pairing_sync_unchanged">No pairing updates yet</string>
     <string name="pairing_sync_failed">Pairing sync failed</string>
+    <string name="beat_sync_changed">Received beats updated</string>
+    <string name="beat_sync_unchanged">No new beats yet</string>
+    <string name="beat_sync_failed">Beat sync failed</string>
     <string name="send_test_beat">Send test beat</string>
     <string name="simulate_incoming_beat">Simulate incoming beat</string>
     <string name="simulate_many_incoming_beats">Simulate 1000 incoming beats</string>

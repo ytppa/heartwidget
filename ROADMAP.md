@@ -35,9 +35,9 @@ Turn the widget into a paired "heart attention" experience:
   - [x] Local sent/received beat counters implemented.
   - [x] Widget badge shows received unread beats.
   - [x] Tapping the local heart records a sent beat and clears received unread beats.
-  - [ ] User A taps their own heart.
-  - [ ] A counter accumulates for User B.
-  - [ ] User B sees the count on or near their heart widget.
+  - [x] User A taps their own heart and writes an unread beat to paired User B in Firestore.
+  - [x] A counter accumulates for User B in Firestore.
+  - [x] User B can pull the count into the local widget badge.
   - [ ] When User B taps their own heart:
     - [ ] User B's received counter resets;
     - [ ] User A starts accumulating a received counter.
@@ -69,6 +69,8 @@ Current decision state:
 - [x] Firestore rules starter file is tracked as `firestore.rules`.
 - [x] Backend request exchange has a first Firestore-backed path through `pairRequests` and `incomingPairRequests`.
 - [x] Firebase writes passed a real-device smoke test on Mi A3 after phone DNS/network was restored.
+- [x] Firebase beat delivery writes unread beats to the paired partner document.
+- [ ] Received beat refresh is pull-based for now; add FCM later for near-immediate widget refresh.
 
 Selected first option:
 

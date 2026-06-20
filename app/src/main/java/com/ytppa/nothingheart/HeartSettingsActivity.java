@@ -94,8 +94,7 @@ public class HeartSettingsActivity extends Activity {
         });
 
         refreshButton.setOnClickListener(view -> {
-            HeartWidgetProvider.refreshAllWidgets(this);
-            updateUi();
+            syncReceivedBeats(true);
         });
 
         updateUi();
@@ -105,6 +104,7 @@ public class HeartSettingsActivity extends Activity {
     protected void onResume() {
         super.onResume();
         updateUi();
+        syncReceivedBeats(false);
     }
 
     private void updateUi() {
@@ -152,7 +152,7 @@ public class HeartSettingsActivity extends Activity {
         createIdentityButton.setEnabled(!hasLocalIdentity);
         partnerPairCodeInput.setEnabled(hasLocalIdentity && !isPaired);
         requestPairingButton.setEnabled(hasLocalIdentity && !isPaired);
-        syncPairingButton.setEnabled(hasLocalIdentity && !isPaired);
+        syncPairingButton.setEnabled(hasLocalIdentity);
         completePairingButton.setEnabled(isPending);
         resetPairingButton.setEnabled(hasLocalIdentity && (isPending || isPaired));
 
@@ -193,6 +193,7 @@ public class HeartSettingsActivity extends Activity {
             public void onPairingSyncComplete(HeartPairingState pairingState, boolean changed) {
                 runOnUiThread(() -> {
                     updateUi();
+                    syncReceivedBeats(false);
                     Toast.makeText(
                             HeartSettingsActivity.this,
                             changed ? R.string.pairing_sync_changed : R.string.pairing_sync_unchanged,
@@ -206,6 +207,35 @@ public class HeartSettingsActivity extends Activity {
                 runOnUiThread(() -> {
                     updateUi();
                     Toast.makeText(HeartSettingsActivity.this, R.string.pairing_sync_failed, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
+    private void syncReceivedBeats(boolean showToast) {
+        repository.syncReceivedBeats(new BeatSyncCallback() {
+            @Override
+            public void onBeatSyncComplete(int receivedBeatCount, boolean changed) {
+                runOnUiThread(() -> {
+                    HeartWidgetProvider.refreshAllWidgets(HeartSettingsActivity.this);
+                    updateUi();
+                    if (showToast) {
+                        Toast.makeText(
+                                HeartSettingsActivity.this,
+                                changed ? R.string.beat_sync_changed : R.string.beat_sync_unchanged,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onBeatSyncFailed(Exception exception) {
+                runOnUiThread(() -> {
+                    updateUi();
+                    if (showToast) {
+                        Toast.makeText(HeartSettingsActivity.this, R.string.beat_sync_failed, Toast.LENGTH_SHORT).show();
+                    }
                 });
             }
         });

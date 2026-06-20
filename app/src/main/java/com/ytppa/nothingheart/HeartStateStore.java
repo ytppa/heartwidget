@@ -58,6 +58,13 @@ public final class HeartStateStore {
         prefs(context).edit().putInt(KEY_RECEIVED_BEAT_COUNT, 0).apply();
     }
 
+    public static int setReceivedBeatCount(Context context, int count) {
+        migrateLegacyLocalCount(context);
+        int nextCount = clampCount(count);
+        prefs(context).edit().putInt(KEY_RECEIVED_BEAT_COUNT, nextCount).apply();
+        return nextCount;
+    }
+
     public static void resetAllBeatCounts(Context context) {
         prefs(context).edit()
                 .putInt(KEY_LEGACY_LOCAL_BEAT_COUNT, 0)

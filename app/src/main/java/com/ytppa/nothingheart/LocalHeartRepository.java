@@ -68,6 +68,13 @@ final class LocalHeartRepository implements HeartRepository {
     }
 
     @Override
+    public void syncReceivedBeats(BeatSyncCallback callback) {
+        if (callback != null) {
+            callback.onBeatSyncComplete(getReceivedBeatCount(), false);
+        }
+    }
+
+    @Override
     public HeartPairingState completeLocalPairing() {
         return HeartStateStore.completeLocalPairing(context);
     }

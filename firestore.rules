@@ -14,7 +14,16 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if signedIn();
-      allow create, update: if signedIn() && request.auth.uid == userId;
+      allow create: if signedIn() && request.auth.uid == userId;
+      allow update: if signedIn()
+        && (
+          request.auth.uid == userId
+          || (
+            resource.data.partnerId == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['receivedUnreadBeatCount', 'lastReceivedBeatAt', 'updatedAt'])
+          )
+        );
     }
 
     match /pairCodes/{pairCode} {

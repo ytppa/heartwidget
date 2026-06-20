@@ -49,7 +49,11 @@ Notes:
 - [x] Starter Firestore rules are tracked in `firestore.rules`.
 - [x] Firebase smoke test on Mi A3 succeeded after phone DNS/network was restored: `users`, `pairCodes`, `pairRequests`, and `incomingPairRequests` writes were accepted.
 - [x] Updated `firestore.rules` were published in Firebase Console after the `incomingPairRequests` rules update.
-- [ ] This is still offline-only and does not sync with another device yet.
+- [x] Paired beat delivery now writes `receivedUnreadBeatCount + 1` to the remote partner user document.
+- [x] Settings refresh / resume / pairing sync pull remote `receivedUnreadBeatCount` into local state and refresh widgets.
+- [ ] Republish `firestore.rules` after the paired-partner beat delivery rule update.
+- [ ] Received beat updates are pull-based until FCM/widget refresh triggers are added.
+- [ ] Full cross-device sync is not complete yet: pairing and beat delivery have Firestore paths, but received badge refresh is still pull-based.
 - [x] Local JDK / Android SDK tooling was restored in ignored project-local folders.
 
 ## Completed Milestone: Local App + Counter
@@ -108,4 +112,4 @@ Notes:
 - [x] The badge is right-anchored so compact values like `10K` expand leftward instead of drifting right.
 - [x] Large counts are compacted for the badge: `1.2K`, `10K`, `999K`, `1.2M`, `99M+`.
 - [x] The settings app can simulate incoming beats to test the widget badge without a backend.
-- [ ] This is still offline-only and does not sync with another device yet.
+- [ ] Full cross-device sync is not complete yet: received badge refresh still needs push or another automatic trigger.
