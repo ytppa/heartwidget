@@ -110,6 +110,13 @@
             android:text="@string/request_pairing" />
 
         <Button
+            android:id="@+id/sync_pairing_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/sync_pairing" />
+
+        <Button
             android:id="@+id/complete_pairing_button"
             android:layout_width="match_parent"
             android:layout_height="48dp"

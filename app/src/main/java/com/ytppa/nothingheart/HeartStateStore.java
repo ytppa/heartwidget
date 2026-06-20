@@ -16,6 +16,8 @@ public final class HeartStateStore {
     private static final String KEY_PAIR_CODE = "pair_code";
     private static final String KEY_PARTNER_ID = "partner_id";
     private static final String KEY_PARTNER_PAIR_CODE = "partner_pair_code";
+    private static final String KEY_PARTNER_REMOTE_USER_ID = "partner_remote_user_id";
+    private static final String KEY_PAIR_REQUEST_ID = "pair_request_id";
     private static final String KEY_PAIR_STATUS = "pair_status";
     private static final int PAIR_CODE_LENGTH = 6;
     private static final String PAIR_CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -89,6 +91,45 @@ public final class HeartStateStore {
                 .putString(KEY_PAIR_STATUS, HeartPairingStatus.PENDING.getStoredValue())
                 .putString(KEY_PARTNER_PAIR_CODE, normalizedPartnerPairCode)
                 .remove(KEY_PARTNER_ID)
+                .remove(KEY_PARTNER_REMOTE_USER_ID)
+                .remove(KEY_PAIR_REQUEST_ID)
+                .apply();
+        return readPairingState(preferences);
+    }
+
+    public static HeartPairingState setOutgoingPairRequestId(Context context, String pairRequestId) {
+        SharedPreferences preferences = prefs(context);
+        if (isBlank(pairRequestId)) {
+            return readPairingState(preferences);
+        }
+
+        preferences.edit()
+                .putString(KEY_PAIR_REQUEST_ID, pairRequestId)
+                .apply();
+        return readPairingState(preferences);
+    }
+
+    public static HeartPairingState setIncomingPairingPending(
+            Context context,
+            String partnerPairCode,
+            String partnerRemoteUserId,
+            String pairRequestId
+    ) {
+        SharedPreferences preferences = prefs(context);
+        ensureLocalIdentityExists(preferences);
+
+        String normalizedPartnerPairCode = normalizePairCode(partnerPairCode);
+        String ownPairCode = preferences.getString(KEY_PAIR_CODE, "");
+        if (!isValidPairCode(normalizedPartnerPairCode) || normalizedPartnerPairCode.equals(ownPairCode)) {
+            return readPairingState(preferences);
+        }
+
+        preferences.edit()
+                .putString(KEY_PAIR_STATUS, HeartPairingStatus.PENDING.getStoredValue())
+                .putString(KEY_PARTNER_PAIR_CODE, normalizedPartnerPairCode)
+                .putString(KEY_PARTNER_REMOTE_USER_ID, nullToEmpty(partnerRemoteUserId))
+                .putString(KEY_PAIR_REQUEST_ID, nullToEmpty(pairRequestId))
+                .remove(KEY_PARTNER_ID)
                 .apply();
         return readPairingState(preferences);
     }
@@ -102,9 +143,34 @@ public final class HeartStateStore {
             return readPairingState(preferences);
         }
 
+        String partnerRemoteUserId = preferences.getString(KEY_PARTNER_REMOTE_USER_ID, "");
         preferences.edit()
                 .putString(KEY_PAIR_STATUS, HeartPairingStatus.PAIRED.getStoredValue())
-                .putString(KEY_PARTNER_ID, buildLocalPartnerId(partnerPairCode))
+                .putString(KEY_PARTNER_ID, isBlank(partnerRemoteUserId) ? buildLocalPartnerId(partnerPairCode) : partnerRemoteUserId)
+                .apply();
+        return readPairingState(preferences);
+    }
+
+    public static HeartPairingState setPairedWithRemotePartner(
+            Context context,
+            String partnerPairCode,
+            String partnerRemoteUserId,
+            String pairRequestId
+    ) {
+        SharedPreferences preferences = prefs(context);
+        ensureLocalIdentityExists(preferences);
+
+        String normalizedPartnerPairCode = normalizePairCode(partnerPairCode);
+        if (!isValidPairCode(normalizedPartnerPairCode) || isBlank(partnerRemoteUserId)) {
+            return readPairingState(preferences);
+        }
+
+        preferences.edit()
+                .putString(KEY_PAIR_STATUS, HeartPairingStatus.PAIRED.getStoredValue())
+                .putString(KEY_PARTNER_PAIR_CODE, normalizedPartnerPairCode)
+                .putString(KEY_PARTNER_REMOTE_USER_ID, partnerRemoteUserId)
+                .putString(KEY_PARTNER_ID, partnerRemoteUserId)
+                .putString(KEY_PAIR_REQUEST_ID, nullToEmpty(pairRequestId))
                 .apply();
         return readPairingState(preferences);
     }
@@ -115,6 +181,8 @@ public final class HeartStateStore {
                 .putString(KEY_PAIR_STATUS, HeartPairingStatus.NONE.getStoredValue())
                 .remove(KEY_PARTNER_ID)
                 .remove(KEY_PARTNER_PAIR_CODE)
+                .remove(KEY_PARTNER_REMOTE_USER_ID)
+                .remove(KEY_PAIR_REQUEST_ID)
                 .apply();
         return readPairingState(preferences);
     }
@@ -226,6 +294,8 @@ public final class HeartStateStore {
         String pairCode = preferences.getString(KEY_PAIR_CODE, "");
         String partnerId = preferences.getString(KEY_PARTNER_ID, "");
         String partnerPairCode = preferences.getString(KEY_PARTNER_PAIR_CODE, "");
+        String partnerRemoteUserId = preferences.getString(KEY_PARTNER_REMOTE_USER_ID, "");
+        String pairRequestId = preferences.getString(KEY_PAIR_REQUEST_ID, "");
         HeartPairingStatus pairStatus = HeartPairingStatus.fromStoredValue(
                 preferences.getString(KEY_PAIR_STATUS, HeartPairingStatus.NONE.getStoredValue())
         );
@@ -237,7 +307,15 @@ public final class HeartStateStore {
             pairStatus = HeartPairingStatus.NONE;
         }
 
-        return new HeartPairingState(myUserId, pairCode, partnerId, partnerPairCode, pairStatus);
+        return new HeartPairingState(
+                myUserId,
+                pairCode,
+                partnerId,
+                partnerPairCode,
+                partnerRemoteUserId,
+                pairRequestId,
+                pairStatus
+        );
     }
 
     private static String generateUserId() {
@@ -258,6 +336,10 @@ public final class HeartStateStore {
 
     private static boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value;
     }
 
     private static void migrateLegacyLocalCount(Context context) {

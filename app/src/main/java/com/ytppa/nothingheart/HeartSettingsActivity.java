@@ -15,6 +15,7 @@ public class HeartSettingsActivity extends Activity {
     private EditText partnerPairCodeInput;
     private Button createIdentityButton;
     private Button requestPairingButton;
+    private Button syncPairingButton;
     private Button completePairingButton;
     private Button resetPairingButton;
 
@@ -30,6 +31,7 @@ public class HeartSettingsActivity extends Activity {
         partnerPairCodeInput = findViewById(R.id.partner_pair_code_input);
         createIdentityButton = findViewById(R.id.create_identity_button);
         requestPairingButton = findViewById(R.id.request_pairing_button);
+        syncPairingButton = findViewById(R.id.sync_pairing_button);
         completePairingButton = findViewById(R.id.complete_pairing_button);
         resetPairingButton = findViewById(R.id.reset_pairing_button);
         Button sendBeatButton = findViewById(R.id.send_beat_button);
@@ -48,6 +50,8 @@ public class HeartSettingsActivity extends Activity {
             requestPairing();
             updateUi();
         });
+
+        syncPairingButton.setOnClickListener(view -> syncPairing());
 
         completePairingButton.setOnClickListener(view -> {
             repository.completeLocalPairing();
@@ -148,6 +152,7 @@ public class HeartSettingsActivity extends Activity {
         createIdentityButton.setEnabled(!hasLocalIdentity);
         partnerPairCodeInput.setEnabled(hasLocalIdentity && !isPaired);
         requestPairingButton.setEnabled(hasLocalIdentity && !isPaired);
+        syncPairingButton.setEnabled(hasLocalIdentity && !isPaired);
         completePairingButton.setEnabled(isPending);
         resetPairingButton.setEnabled(hasLocalIdentity && (isPending || isPaired));
 
@@ -179,6 +184,31 @@ public class HeartSettingsActivity extends Activity {
         }
 
         repository.requestPairing(partnerPairCode);
+    }
+
+    private void syncPairing() {
+        syncPairingButton.setEnabled(false);
+        repository.syncPairing(new PairingSyncCallback() {
+            @Override
+            public void onPairingSyncComplete(HeartPairingState pairingState, boolean changed) {
+                runOnUiThread(() -> {
+                    updateUi();
+                    Toast.makeText(
+                            HeartSettingsActivity.this,
+                            changed ? R.string.pairing_sync_changed : R.string.pairing_sync_unchanged,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                });
+            }
+
+            @Override
+            public void onPairingSyncFailed(Exception exception) {
+                runOnUiThread(() -> {
+                    updateUi();
+                    Toast.makeText(HeartSettingsActivity.this, R.string.pairing_sync_failed, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 
     private String formatPartner(HeartPairingState pairingState) {

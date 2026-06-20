@@ -21,6 +21,8 @@ public interface HeartRepository {
 
     HeartPairingState requestPairing(String partnerPairCode);
 
+    void syncPairing(PairingSyncCallback callback);
+
     HeartPairingState completeLocalPairing();
 
     HeartPairingState resetPairing();

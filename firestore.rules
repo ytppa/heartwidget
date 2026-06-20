@@ -6,6 +6,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function ownsPairCode(pairCode) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/pairCodes/$(pairCode))
+        && get(/databases/$(database)/documents/pairCodes/$(pairCode)).data.ownerUserId == request.auth.uid;
+    }
+
     match /users/{userId} {
       allow read: if signedIn();
       allow create, update: if signedIn() && request.auth.uid == userId;
@@ -18,9 +24,33 @@ service cloud.firestore {
     }
 
     match /pairRequests/{requestId} {
-      allow read: if signedIn();
-      allow create, update: if signedIn()
+      allow read: if signedIn()
+        && (
+          resource.data.fromUserId == request.auth.uid
+          || ownsPairCode(resource.data.toPairCode)
+        );
+      allow create: if signedIn()
         && request.resource.data.fromUserId == request.auth.uid;
+      allow update: if signedIn()
+        && (
+          resource.data.fromUserId == request.auth.uid
+          || ownsPairCode(resource.data.toPairCode)
+        );
+    }
+
+    match /incomingPairRequests/{pairCode} {
+      allow read: if signedIn()
+        && (
+          ownsPairCode(pairCode)
+          || resource.data.fromUserId == request.auth.uid
+        );
+      allow create: if signedIn()
+        && request.resource.data.fromUserId == request.auth.uid;
+      allow update: if signedIn()
+        && (
+          ownsPairCode(pairCode)
+          || resource.data.fromUserId == request.auth.uid
+        );
     }
   }
 }

@@ -14,6 +14,7 @@ Native Android home-screen widget prototype for a small paired-heart experience.
 - Local pairing flow can create your code, enter a partner code, create a pending request, complete local pairing, and unpair.
 - Backend-independent repository boundary around beat and pairing operations.
 - Optional Firebase-backed repository wrapper for anonymous Auth and Firestore writes when local `app/google-services.json` is present.
+- Firebase pairing sync can publish outgoing requests, check incoming requests by pair code, accept an incoming request, and detect accepted outgoing requests.
 - Widget badge shows received unread beats.
 - Widget tap records a sent beat, clears received unread beats, and plays the heartbeat animation.
 - Compact counter badge formatting: `1.2K`, `10K`, `999K`, `1.2M`, `99M+`.
@@ -84,6 +85,8 @@ Initial Firestore rules are kept in:
 ```text
 firestore.rules
 ```
+
+Publish those rules from Firebase Console after every rules change.
 
 ## Regenerate Heart Frames
 

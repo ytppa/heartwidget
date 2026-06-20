@@ -7,6 +7,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
@@ -18,14 +19,17 @@ final class FirebaseHeartRepository implements HeartRepository {
     private static final String COLLECTION_USERS = "users";
     private static final String COLLECTION_PAIR_CODES = "pairCodes";
     private static final String COLLECTION_PAIR_REQUESTS = "pairRequests";
+    private static final String COLLECTION_INCOMING_PAIR_REQUESTS = "incomingPairRequests";
 
     private final LocalHeartRepository localRepository;
     private final FirebaseAuth auth;
     private final FirebaseFirestore firestore;
     private final boolean firebaseReady;
+    private final Context context;
 
     FirebaseHeartRepository(Context context) {
         Context appContext = context.getApplicationContext();
+        this.context = appContext;
         localRepository = new LocalHeartRepository(appContext);
 
         FirebaseApp app = initializeFirebase(appContext);
@@ -102,10 +106,39 @@ final class FirebaseHeartRepository implements HeartRepository {
     }
 
     @Override
+    public void syncPairing(PairingSyncCallback callback) {
+        HeartPairingState state = localRepository.ensureLocalIdentity();
+        syncPairingState(state);
+
+        if (!firebaseReady) {
+            notifySyncComplete(callback, state, false);
+            return;
+        }
+
+        withSignedInUser(user -> {
+            HeartPairingState latestState = localRepository.getPairingState();
+            if (latestState.getPairStatus() == HeartPairingStatus.PENDING && latestState.hasPartnerPairCode()) {
+                checkOutgoingPairingStatus(user, latestState, callback);
+                return;
+            }
+            if (latestState.getPairStatus() == HeartPairingStatus.NONE) {
+                checkIncomingPairingRequest(latestState, callback);
+                return;
+            }
+            notifySyncComplete(callback, latestState, false);
+        }, exception -> notifySyncFailed(callback, exception));
+    }
+
+    @Override
     public HeartPairingState completeLocalPairing() {
+        HeartPairingState previousState = localRepository.getPairingState();
         HeartPairingState state = localRepository.completeLocalPairing();
         syncPairingState(state);
-        writePairRequest(state, "accepted_local");
+        if (previousState.hasPairRequestId() && previousState.hasPartnerRemoteUserId()) {
+            acceptIncomingPairRequest(state);
+        } else {
+            writePairRequest(state, "accepted_local");
+        }
         return state;
     }
 
@@ -179,6 +212,9 @@ final class FirebaseHeartRepository implements HeartRepository {
         }
 
         withSignedInUser(user -> {
+            String pairRequestId = buildPairRequestId(user.getUid(), state.getPartnerPairCode());
+            HeartStateStore.setOutgoingPairRequestId(context, pairRequestId);
+
             Map<String, Object> data = new HashMap<>();
             data.put("fromUserId", user.getUid());
             data.put("fromLocalUserId", state.getMyUserId());
@@ -192,8 +228,115 @@ final class FirebaseHeartRepository implements HeartRepository {
             }
 
             logFailures(firestore.collection(COLLECTION_PAIR_REQUESTS)
-                    .document(buildPairRequestId(user.getUid(), state.getPartnerPairCode()))
+                    .document(pairRequestId)
                     .set(data, SetOptions.merge()));
+
+            if ("pending".equals(status)) {
+                Map<String, Object> incomingData = new HashMap<>();
+                incomingData.put("requestId", pairRequestId);
+                incomingData.put("fromUserId", user.getUid());
+                incomingData.put("fromLocalUserId", state.getMyUserId());
+                incomingData.put("fromPairCode", state.getPairCode());
+                incomingData.put("toPairCode", state.getPartnerPairCode());
+                incomingData.put("status", status);
+                incomingData.put("updatedAt", FieldValue.serverTimestamp());
+                incomingData.put("createdAt", FieldValue.serverTimestamp());
+
+                logFailures(firestore.collection(COLLECTION_INCOMING_PAIR_REQUESTS)
+                        .document(state.getPartnerPairCode())
+                        .set(incomingData, SetOptions.merge()));
+            }
+        });
+    }
+
+    private void checkIncomingPairingRequest(HeartPairingState state, PairingSyncCallback callback) {
+        firestore.collection(COLLECTION_INCOMING_PAIR_REQUESTS)
+                .document(state.getPairCode())
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (!document.exists() || !"pending".equals(document.getString("status"))) {
+                        notifySyncComplete(callback, state, false);
+                        return;
+                    }
+
+                    String fromPairCode = document.getString("fromPairCode");
+                    String fromUserId = document.getString("fromUserId");
+                    String requestId = document.getString("requestId");
+                    if (!HeartStateStore.isValidPairCode(fromPairCode) || isBlank(fromUserId) || isBlank(requestId)) {
+                        notifySyncComplete(callback, state, false);
+                        return;
+                    }
+
+                    HeartPairingState updatedState = HeartStateStore.setIncomingPairingPending(
+                            context,
+                            fromPairCode,
+                            fromUserId,
+                            requestId
+                    );
+                    syncPairingState(updatedState);
+                    notifySyncComplete(callback, updatedState, true);
+                })
+                .addOnFailureListener(exception -> notifySyncFailed(callback, exception));
+    }
+
+    private void checkOutgoingPairingStatus(FirebaseUser user, HeartPairingState state, PairingSyncCallback callback) {
+        String pairRequestId = state.hasPairRequestId()
+                ? state.getPairRequestId()
+                : buildPairRequestId(user.getUid(), state.getPartnerPairCode());
+
+        firestore.collection(COLLECTION_PAIR_REQUESTS)
+                .document(pairRequestId)
+                .get()
+                .addOnSuccessListener(document -> handleOutgoingPairingDocument(document, state, pairRequestId, callback))
+                .addOnFailureListener(exception -> notifySyncFailed(callback, exception));
+    }
+
+    private void handleOutgoingPairingDocument(
+            DocumentSnapshot document,
+            HeartPairingState state,
+            String pairRequestId,
+            PairingSyncCallback callback
+    ) {
+        if (!document.exists() || !"accepted".equals(document.getString("status"))) {
+            notifySyncComplete(callback, state, false);
+            return;
+        }
+
+        String acceptedByUserId = document.getString("acceptedByUserId");
+        String acceptedByPairCode = document.getString("acceptedByPairCode");
+        if (isBlank(acceptedByUserId) || !HeartStateStore.isValidPairCode(acceptedByPairCode)) {
+            notifySyncComplete(callback, state, false);
+            return;
+        }
+
+        HeartPairingState updatedState = HeartStateStore.setPairedWithRemotePartner(
+                context,
+                acceptedByPairCode,
+                acceptedByUserId,
+                pairRequestId
+        );
+        syncPairingState(updatedState);
+        notifySyncComplete(callback, updatedState, true);
+    }
+
+    private void acceptIncomingPairRequest(HeartPairingState state) {
+        withSignedInUser(user -> {
+            Map<String, Object> data = new HashMap<>();
+            data.put("status", "accepted");
+            data.put("acceptedByUserId", user.getUid());
+            data.put("acceptedByPairCode", state.getPairCode());
+            data.put("updatedAt", FieldValue.serverTimestamp());
+            data.put("acceptedAt", FieldValue.serverTimestamp());
+
+            logFailures(firestore.collection(COLLECTION_PAIR_REQUESTS)
+                    .document(state.getPairRequestId())
+                    .set(data, SetOptions.merge()));
+
+            Map<String, Object> incomingData = new HashMap<>(data);
+            incomingData.put("requestId", state.getPairRequestId());
+            logFailures(firestore.collection(COLLECTION_INCOMING_PAIR_REQUESTS)
+                    .document(state.getPairCode())
+                    .set(incomingData, SetOptions.merge()));
         });
     }
 
@@ -212,6 +355,10 @@ final class FirebaseHeartRepository implements HeartRepository {
     }
 
     private void withSignedInUser(FirebaseUserConsumer consumer) {
+        withSignedInUser(consumer, null);
+    }
+
+    private void withSignedInUser(FirebaseUserConsumer consumer, FirebaseFailureConsumer failureConsumer) {
         if (!firebaseReady) {
             return;
         }
@@ -230,7 +377,12 @@ final class FirebaseHeartRepository implements HeartRepository {
                         consumer.accept(user);
                     }
                 })
-                .addOnFailureListener(exception -> Log.w(TAG, "Anonymous Firebase sign-in failed.", exception));
+                .addOnFailureListener(exception -> {
+                    Log.w(TAG, "Anonymous Firebase sign-in failed.", exception);
+                    if (failureConsumer != null) {
+                        failureConsumer.accept(exception);
+                    }
+                });
     }
 
     private void logFailures(com.google.android.gms.tasks.Task<?> task) {
@@ -239,5 +391,25 @@ final class FirebaseHeartRepository implements HeartRepository {
 
     private interface FirebaseUserConsumer {
         void accept(FirebaseUser user);
+    }
+
+    private interface FirebaseFailureConsumer {
+        void accept(Exception exception);
+    }
+
+    private void notifySyncComplete(PairingSyncCallback callback, HeartPairingState state, boolean changed) {
+        if (callback != null) {
+            callback.onPairingSyncComplete(state, changed);
+        }
+    }
+
+    private void notifySyncFailed(PairingSyncCallback callback, Exception exception) {
+        if (callback != null) {
+            callback.onPairingSyncFailed(exception);
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

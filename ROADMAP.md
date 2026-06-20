@@ -23,8 +23,9 @@ Turn the widget into a paired "heart attention" experience:
   - [x] User gets a local pair code in the offline prototype.
   - [x] User enters another person's connection ID in the local prototype.
   - [x] Local prototype creates a pending request from the entered partner code.
-  - [ ] User A sends a backend-backed connect request to User B.
-  - [ ] User B accepts or rejects.
+  - [x] User A can publish a backend-backed connect request to User B's pair code.
+  - [x] User B can sync and accept an incoming backend-backed request.
+  - [ ] User B can reject an incoming request.
   - [x] Local paired state is limited to one partner.
   - [x] Local unpair / reset pairing prototype.
   - [ ] Backend-backed unpair / reset pairing.
@@ -66,7 +67,8 @@ Current decision state:
 - [x] Firebase was selected for the first backend path.
 - [x] The code keeps `LocalHeartRepository` available as the offline fallback.
 - [x] Firestore rules starter file is tracked as `firestore.rules`.
-- [ ] Firebase writes still need a real-device network pass and published Firestore rules.
+- [x] Backend request exchange has a first Firestore-backed path through `pairRequests` and `incomingPairRequests`.
+- [ ] Firebase writes still need a real-device network pass after phone DNS/network is working.
 
 Selected first option:
 
@@ -101,6 +103,15 @@ pairs/{pairId}
   heartStyleForA
   heartStyleForB
   updatedAt
+```
+
+Current Firestore collections:
+
+```text
+users/{firebaseUid}
+pairCodes/{publicPairCode}
+pairRequests/{fromUserId_toPairCode}
+incomingPairRequests/{toPairCode}
 ```
 
 ## Open Questions
