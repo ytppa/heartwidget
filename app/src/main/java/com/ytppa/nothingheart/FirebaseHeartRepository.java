@@ -65,7 +65,7 @@ final class FirebaseHeartRepository implements HeartRepository {
                     .set(data, SetOptions.merge());
             logTask("sent beat count write", ownWrite);
 
-            ownWrite.addOnSuccessListener(unused -> writePartnerReceivedBeat(pairingState));
+            ownWrite.addOnSuccessListener(unused -> writePartnerReceivedBeat(user, pairingState));
         });
     }
 
@@ -131,6 +131,12 @@ final class FirebaseHeartRepository implements HeartRepository {
             }
             if (latestState.getPairStatus() == HeartPairingStatus.NONE) {
                 checkIncomingPairingRequest(latestState, callback);
+                return;
+            }
+            if (latestState.getPairStatus() == HeartPairingStatus.PAIRED
+                    && !latestState.hasPartnerRemoteUserId()
+                    && latestState.hasPairRequestId()) {
+                checkPairedRemotePartner(user, latestState, callback);
                 return;
             }
             notifySyncComplete(callback, latestState, false);
@@ -362,6 +368,23 @@ final class FirebaseHeartRepository implements HeartRepository {
         notifySyncComplete(callback, updatedState, true);
     }
 
+    private void checkPairedRemotePartner(FirebaseUser user, HeartPairingState state, PairingSyncCallback callback) {
+        firestore.collection(COLLECTION_PAIR_REQUESTS)
+                .document(state.getPairRequestId())
+                .get()
+                .addOnSuccessListener(document -> {
+                    HeartPairingState updatedState = restoreRemotePartnerFromAcceptedRequest(user, state, document);
+                    if (updatedState.hasPartnerRemoteUserId()) {
+                        syncPairingState(updatedState);
+                        notifySyncComplete(callback, updatedState, true);
+                        return;
+                    }
+
+                    notifySyncComplete(callback, state, false);
+                })
+                .addOnFailureListener(exception -> notifySyncFailed(callback, exception));
+    }
+
     private void acceptIncomingPairRequest(HeartPairingState state) {
         withSignedInUser(user -> {
             Map<String, Object> data = new HashMap<>();
@@ -397,8 +420,75 @@ final class FirebaseHeartRepository implements HeartRepository {
         });
     }
 
-    private void writePartnerReceivedBeat(HeartPairingState pairingState) {
+    private HeartPairingState restoreRemotePartnerFromAcceptedRequest(
+            FirebaseUser user,
+            HeartPairingState state,
+            DocumentSnapshot document
+    ) {
+        if (!document.exists() || !"accepted".equals(document.getString("status"))) {
+            return state;
+        }
+
+        String fromUserId = document.getString("fromUserId");
+        String fromPairCode = document.getString("fromPairCode");
+        String acceptedByUserId = document.getString("acceptedByUserId");
+        String acceptedByPairCode = document.getString("acceptedByPairCode");
+
+        String partnerUserId = "";
+        String partnerPairCode = "";
+        if (user.getUid().equals(fromUserId)) {
+            partnerUserId = acceptedByUserId;
+            partnerPairCode = acceptedByPairCode;
+        } else if (user.getUid().equals(acceptedByUserId)) {
+            partnerUserId = fromUserId;
+            partnerPairCode = fromPairCode;
+        }
+
+        if (isBlank(partnerUserId) || !HeartStateStore.isValidPairCode(partnerPairCode)) {
+            return state;
+        }
+        if (state.hasPartnerPairCode() && !state.getPartnerPairCode().equals(partnerPairCode)) {
+            return state;
+        }
+
+        return HeartStateStore.setPairedWithRemotePartner(
+                context,
+                partnerPairCode,
+                partnerUserId,
+                state.getPairRequestId()
+        );
+    }
+
+    private void writePartnerReceivedBeat(FirebaseUser user, HeartPairingState pairingState) {
         if (pairingState.getPairStatus() != HeartPairingStatus.PAIRED || !pairingState.hasPartnerRemoteUserId()) {
+            if (pairingState.getPairStatus() == HeartPairingStatus.PAIRED && pairingState.hasPairRequestId()) {
+                restoreRemotePartnerThenWriteBeat(user, pairingState);
+            }
+            return;
+        }
+
+        writePartnerReceivedBeat(pairingState.getPartnerRemoteUserId());
+    }
+
+    private void restoreRemotePartnerThenWriteBeat(FirebaseUser user, HeartPairingState pairingState) {
+        firestore.collection(COLLECTION_PAIR_REQUESTS)
+                .document(pairingState.getPairRequestId())
+                .get()
+                .addOnSuccessListener(document -> {
+                    HeartPairingState updatedState = restoreRemotePartnerFromAcceptedRequest(user, pairingState, document);
+                    if (!updatedState.hasPartnerRemoteUserId()) {
+                        Log.w(TAG, "Firebase partner received beat skipped: missing remote partner user id.");
+                        return;
+                    }
+
+                    syncPairingState(updatedState);
+                    writePartnerReceivedBeat(updatedState.getPartnerRemoteUserId());
+                })
+                .addOnFailureListener(exception -> Log.w(TAG, "Firebase partner restore before beat failed.", exception));
+    }
+
+    private void writePartnerReceivedBeat(String partnerRemoteUserId) {
+        if (isBlank(partnerRemoteUserId)) {
             return;
         }
 
@@ -408,7 +498,7 @@ final class FirebaseHeartRepository implements HeartRepository {
         partnerData.put("updatedAt", FieldValue.serverTimestamp());
 
         logTask("partner received beat write", firestore.collection(COLLECTION_USERS)
-                .document(pairingState.getPartnerRemoteUserId())
+                .document(partnerRemoteUserId)
                 .set(partnerData, SetOptions.merge()));
     }
 

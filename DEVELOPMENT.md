@@ -51,6 +51,7 @@ Notes:
 - [x] Updated `firestore.rules` were published in Firebase Console after the `incomingPairRequests` rules update.
 - [x] Paired beat delivery now writes `receivedUnreadBeatCount + 1` to the remote partner user document.
 - [x] Fixed the partner beat write path after `PERMISSION_DENIED`: rules now validate an accepted pair request before allowing a paired device to increment the partner unread count.
+- [x] `Sync pairing` and beat send now restore `partner_remote_user_id` from an accepted pair request when an older local paired state only has `local-partner-*`.
 - [x] Settings refresh / resume / pairing sync pull remote `receivedUnreadBeatCount` into local state and refresh widgets.
 - [ ] Republish `firestore.rules` after the paired-partner beat delivery rule update.
 - [ ] Received beat updates are pull-based until FCM/widget refresh triggers are added.
