@@ -7,6 +7,6 @@ public final class HeartRepositories {
     }
 
     public static HeartRepository get(Context context) {
-        return new LocalHeartRepository(context);
+        return new FirebaseHeartRepository(context);
     }
 }

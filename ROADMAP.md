@@ -53,6 +53,7 @@ Turn the widget into a paired "heart attention" experience:
 - [x] Local paired-counter semantics can be prototyped without a backend.
 - [x] Backend-independent repository/adaptor boundary exists.
 - [x] Local identity and pair status can be prototyped without a backend.
+- [x] Firebase Auth / Firestore SDK wiring exists behind the repository boundary.
 - [ ] Cross-device state requires a backend or peer-to-peer transport.
 - [ ] For a first reliable version, use a small backend rather than direct peer-to-peer.
 - [ ] The widget should stay functional even when network is unavailable, then sync later.
@@ -62,13 +63,15 @@ Turn the widget into a paired "heart attention" experience:
 Current decision state:
 
 - [x] Repository operations now map to backend-shaped actions: create identity, request pairing, complete local pairing, unpair, send beat, and clear received beats.
-- [x] The code stays transport-independent and does not hard-lock Firebase, Supabase, or a custom backend.
-- [ ] The backend provider still needs an explicit user decision before implementation.
+- [x] Firebase was selected for the first backend path.
+- [x] The code keeps `LocalHeartRepository` available as the offline fallback.
+- [x] Firestore rules starter file is tracked as `firestore.rules`.
+- [ ] Firebase writes still need a real-device network pass and published Firestore rules.
 
-Recommended first option to confirm:
+Selected first option:
 
-- [ ] Firebase Authentication with anonymous users.
-- [ ] Cloud Firestore for pairing and counters.
+- [x] Firebase Authentication with anonymous users.
+- [x] Cloud Firestore for pairing and counters.
 - [ ] Firebase Cloud Messaging for optional push nudges / widget refresh triggers.
 
 Alternatives:

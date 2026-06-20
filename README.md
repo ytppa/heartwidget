@@ -13,6 +13,7 @@ Native Android home-screen widget prototype for a small paired-heart experience.
 - Local-only identity and pairing state stored in `SharedPreferences`.
 - Local pairing flow can create your code, enter a partner code, create a pending request, complete local pairing, and unpair.
 - Backend-independent repository boundary around beat and pairing operations.
+- Optional Firebase-backed repository wrapper for anonymous Auth and Firestore writes when local `app/google-services.json` is present.
 - Widget badge shows received unread beats.
 - Widget tap records a sent beat, clears received unread beats, and plays the heartbeat animation.
 - Compact counter badge formatting: `1.2K`, `10K`, `999K`, `1.2M`, `99M+`.
@@ -28,6 +29,8 @@ The heartbeat is implemented with pre-rendered `drawable-nodpi` PNG frames becau
 - `app/src/main/java/com/ytppa/nothingheart/HeartStateStore.java`
 - `app/src/main/java/com/ytppa/nothingheart/HeartRepository.java`
 - `app/src/main/java/com/ytppa/nothingheart/LocalHeartRepository.java`
+- `app/src/main/java/com/ytppa/nothingheart/FirebaseHeartRepository.java`
+- `firestore.rules`
 - `tools/generate-heart-frames.ps1`
 - `DEVELOPMENT.md`
 - `ROADMAP.md`
@@ -59,6 +62,28 @@ Or use the local helper script:
 ```
 
 The helper expects local SDK/JDK/Gradle folders in the project root. Those folders are machine-specific and are ignored by Git.
+
+## Firebase
+
+The Android application id / Firebase package name is:
+
+```text
+com.ytppa.nothingheart
+```
+
+For local Firebase testing, download `google-services.json` from Firebase Console and place it at:
+
+```text
+app\google-services.json
+```
+
+That file is machine-specific and ignored by Git. When it is present, the build applies the Google Services plugin and the app uses `FirebaseHeartRepository`; when it is absent, Firebase initialization falls back to local behavior.
+
+Initial Firestore rules are kept in:
+
+```text
+firestore.rules
+```
 
 ## Regenerate Heart Frames
 

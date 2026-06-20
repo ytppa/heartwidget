@@ -42,6 +42,11 @@ Notes:
 - [x] The repository boundary is transport-independent so a backend adapter can replace the local implementation later.
 - [x] Backend decision gate is documented in `ROADMAP.md`; provider choice remains explicit and pending.
 - [x] Android application id / Firebase package name now uses author nickname: `com.ytppa.nothingheart`.
+- [x] Firebase Auth and Firestore dependencies are wired with BoM `34.15.0` and Google Services plugin `4.5.0`.
+- [x] `FirebaseHeartRepository` wraps the local repository and asynchronously writes identity, pairing state, pair requests, and counters when Firebase is configured.
+- [x] `app/google-services.json` is ignored by Git and used only for local Firebase builds.
+- [x] Starter Firestore rules are tracked in `firestore.rules`.
+- [ ] Firebase smoke test on Mi A3 reached the repository path but anonymous sign-in failed while the phone could not resolve `firebase.google.com`.
 - [ ] This is still offline-only and does not sync with another device yet.
 - [x] Local JDK / Android SDK tooling was restored in ignored project-local folders.
 
