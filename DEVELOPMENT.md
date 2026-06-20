@@ -55,9 +55,11 @@ Notes:
 - [x] Settings refresh / resume / pairing sync pull remote `receivedUnreadBeatCount` into local state and refresh widgets.
 - [x] FCM client wiring added: the app saves `fcmToken`, receives silent `heart_beat` data pushes, pulls received beats, and refreshes widgets.
 - [x] Cloud Function source added in `functions/index.js` to send `heart_beat` pushes when `receivedUnreadBeatCount` increases.
-- [ ] Deploy Firebase Functions and re-test automatic widget refresh on two phones.
+- [ ] Firebase Functions deployment is blocked for now because the user cannot attach a payment card / switch to Blaze.
+- [ ] Next backend direction is a free custom push bridge: verify Firebase ID tokens, update Firestore with backend-held Firebase Admin credentials, and send FCM `heart_beat` data pushes.
+- [ ] Re-test automatic widget refresh on two phones after the custom backend bridge is deployed.
 - [ ] Republish `firestore.rules` after the paired-partner beat delivery rule update.
-- [ ] Received beat updates are still pull-based in production until the Cloud Function is deployed.
+- [ ] Received beat updates are still pull-based in production until a push sender is deployed.
 - [ ] Full cross-device sync is not complete yet: pairing and beat delivery have Firestore paths, but received badge refresh is still pull-based.
 - [x] Local JDK / Android SDK tooling was restored in ignored project-local folders.
 

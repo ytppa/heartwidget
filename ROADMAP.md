@@ -61,6 +61,7 @@ Longer-range ideas that are not in the active milestone are kept in `BACKLOG.md`
 - [x] Firebase Auth / Firestore SDK wiring exists behind the repository boundary.
 - [ ] Cross-device state requires a backend or peer-to-peer transport.
 - [ ] For a first reliable version, use a small backend rather than direct peer-to-peer.
+- [ ] User cannot attach a payment card for Firebase Blaze right now, so prefer a free custom backend push bridge over Firebase Cloud Functions.
 - [ ] The widget should stay functional even when network is unavailable, then sync later.
 
 ## Backend Decision Gate
@@ -74,19 +75,22 @@ Current decision state:
 - [x] Backend request exchange has a first Firestore-backed path through `pairRequests` and `incomingPairRequests`.
 - [x] Firebase writes passed a real-device smoke test on Mi A3 after phone DNS/network was restored.
 - [x] Firebase beat delivery writes unread beats to the paired partner document.
-- [ ] Received beat refresh has FCM client/function source, but automatic widget refresh still needs function deployment and two-phone testing.
+- [ ] Received beat refresh has FCM client/function source, but automatic widget refresh still needs a deployable push sender and two-phone testing.
+- [ ] Firebase Cloud Functions / Blaze is blocked for now because the user cannot attach a payment card.
+- [ ] Next backend direction: custom free-tier push bridge that verifies Firebase ID tokens, updates Firestore with Firebase Admin credentials, and sends FCM data pushes.
 
 Selected first option:
 
 - [x] Firebase Authentication with anonymous users.
 - [x] Cloud Firestore for pairing and counters.
 - [x] Firebase Cloud Messaging client wiring for widget refresh triggers.
-- [ ] Firebase Cloud Functions deployment for sending widget refresh triggers.
+- [ ] Custom backend bridge for sending widget refresh triggers without Firebase Blaze.
+- [ ] Firebase Cloud Functions deployment for sending widget refresh triggers is parked as an optional later path.
 
 Alternatives:
 
 - [ ] Supabase Auth + Postgres + Realtime.
-- [ ] Custom small backend with REST/WebSocket.
+- [x] Custom small backend with REST/FCM bridge selected as the next path around Blaze/card constraints.
 
 ## Data Sketch
 
