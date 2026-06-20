@@ -84,6 +84,7 @@ final class SupabaseHeartRepository implements HeartRepository {
             ensureRemoteProfile(null);
             apiClient.rpc("create_pair_code", new JSONObject());
             syncRemoteState();
+            Log.d(TAG, "Supabase identity sync succeeded.");
         }, exception -> Log.w(TAG, "Supabase identity sync failed.", exception));
         return state;
     }
@@ -106,7 +107,10 @@ final class SupabaseHeartRepository implements HeartRepository {
             return;
         }
 
-        runAsync(() -> ensureRemoteProfile(token), exception -> Log.w(TAG, "Supabase FCM token sync failed.", exception));
+        runAsync(() -> {
+            ensureRemoteProfile(token);
+            Log.d(TAG, "Supabase FCM token sync succeeded.");
+        }, exception -> Log.w(TAG, "Supabase FCM token sync failed.", exception));
     }
 
     @Override
@@ -124,13 +128,17 @@ final class SupabaseHeartRepository implements HeartRepository {
     @Override
     public void syncPairing(PairingSyncCallback callback) {
         runAsync(() -> {
+            Log.d(TAG, "Supabase pairing sync started.");
             ensureRemoteProfile(null);
             apiClient.rpc("create_pair_code", new JSONObject());
             RemoteState state = syncRemoteState();
+            Log.d(TAG, "Supabase pairing sync succeeded: " + state.pairingState.getPairStatus().getStoredValue()
+                    + " / " + state.pairingState.getPairCode());
             if (callback != null) {
                 callback.onPairingSyncComplete(state.pairingState, state.changed);
             }
         }, exception -> {
+            Log.w(TAG, "Supabase pairing sync failed.", exception);
             if (callback != null) {
                 callback.onPairingSyncFailed(exception);
             }
@@ -145,6 +153,7 @@ final class SupabaseHeartRepository implements HeartRepository {
                 callback.onBeatSyncComplete(state.receivedUnreadCount, state.changed);
             }
         }, exception -> {
+            Log.w(TAG, "Supabase received beat sync failed.", exception);
             if (callback != null) {
                 callback.onBeatSyncFailed(exception);
             }

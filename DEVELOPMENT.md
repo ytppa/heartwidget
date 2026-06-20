@@ -61,7 +61,8 @@ Notes:
 - [x] Supabase SQL contract is tracked in `supabase/schema.sql`.
 - [x] Android build now supports local Supabase configuration through ignored `local.properties` keys: `supabase.url` and `supabase.anonKey`.
 - [x] First Android Supabase repository adapter is implemented behind `HeartRepository` and gated by local Supabase configuration.
-- [ ] Next implementation step: add local Supabase URL/key, smoke-test anonymous sign-in and RPC calls on a phone.
+- [x] Local Supabase URL/key were added to ignored `local.properties` and one-phone smoke test passed: anonymous session, `create_pair_code`, and `get_my_pairing_state` updated local pair code to `GPMB26`.
+- [ ] Next implementation step: install the Supabase-configured APK on a second phone and test request/accept pairing.
 - [ ] Re-test automatic widget refresh on two phones after the custom backend bridge is deployed.
 - [ ] Republish `firestore.rules` after the paired-partner beat delivery rule update.
 - [ ] Received beat updates are still pull-based in production until a push sender is deployed.

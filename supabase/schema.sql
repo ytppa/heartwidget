@@ -173,7 +173,7 @@ language plpgsql
 as $$
 declare
   v_alphabet text := '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-  v_bytes bytea := gen_random_bytes(6);
+  v_bytes bytea := extensions.gen_random_bytes(6);
   v_code text := '';
   i integer;
 begin
