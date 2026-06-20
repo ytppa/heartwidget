@@ -37,6 +37,7 @@ The heartbeat is implemented with pre-rendered `drawable-nodpi` PNG frames becau
 - `functions/index.js`
 - `firebase.json`
 - `firestore.rules`
+- `supabase/schema.sql`
 - `tools/generate-heart-frames.ps1`
 - `DEVELOPMENT.md`
 - `ROADMAP.md`
@@ -107,6 +108,18 @@ firebase deploy --only functions,firestore:rules
 ```
 
 Cloud Functions deployment may require enabling the Blaze plan in Firebase.
+
+## Supabase
+
+Supabase is the current free-tier backend candidate while Firebase Cloud Functions / Blaze is blocked by the billing-card requirement.
+
+The SQL contract is tracked in:
+
+```text
+supabase\schema.sql
+```
+
+It creates the Postgres tables, RLS policies, and RPC functions for anonymous profiles, pair codes, pair requests, pairs, counters, and beat events. Run it from Supabase SQL Editor after creating the project and enabling Anonymous Sign-ins.
 
 ## Regenerate Heart Frames
 

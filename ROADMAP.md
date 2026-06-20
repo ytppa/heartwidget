@@ -62,6 +62,7 @@ Longer-range ideas that are not in the active milestone are kept in `BACKLOG.md`
 - [ ] Cross-device state requires a backend or peer-to-peer transport.
 - [ ] For a first reliable version, use a small backend rather than direct peer-to-peer.
 - [ ] User cannot attach a payment card for Firebase Blaze right now, so prefer a free custom backend push bridge over Firebase Cloud Functions.
+- [x] Supabase project path was started with Anonymous Auth, Postgres tables, RLS policies, and pairing/beat RPC functions.
 - [ ] The widget should stay functional even when network is unavailable, then sync later.
 
 ## Backend Decision Gate
@@ -77,7 +78,8 @@ Current decision state:
 - [x] Firebase beat delivery writes unread beats to the paired partner document.
 - [ ] Received beat refresh has FCM client/function source, but automatic widget refresh still needs a deployable push sender and two-phone testing.
 - [ ] Firebase Cloud Functions / Blaze is blocked for now because the user cannot attach a payment card.
-- [ ] Next backend direction: custom free-tier push bridge that verifies Firebase ID tokens, updates Firestore with Firebase Admin credentials, and sends FCM data pushes.
+- [x] Next backend direction shifted to Supabase Free: anonymous Auth, Postgres/RLS, RPC functions, and FCM client transport.
+- [ ] Android still needs a Supabase repository adapter before this path is usable from the app.
 
 Selected first option:
 
@@ -90,7 +92,8 @@ Selected first option:
 Alternatives:
 
 - [ ] Supabase Auth + Postgres + Realtime.
-- [x] Custom small backend with REST/FCM bridge selected as the next path around Blaze/card constraints.
+- [x] Supabase Auth + Postgres/RPC selected as the current free path around Blaze/card constraints.
+- [ ] Custom small backend with REST/FCM bridge remains a fallback if Supabase limits or Android integration block us.
 
 ## Data Sketch
 
@@ -123,6 +126,19 @@ users/{firebaseUid}
 pairCodes/{publicPairCode}
 pairRequests/{fromUserId_toPairCode}
 incomingPairRequests/{toPairCode}
+```
+
+Current Supabase objects are tracked in `supabase/schema.sql`:
+
+```text
+profiles
+pair_codes
+pair_requests
+pairs
+pair_member_state
+beat_events
+RPC: ensure_profile, create_pair_code, request_pairing, accept_pairing,
+     get_my_pairing_state, send_beat, clear_received_beats
 ```
 
 ## Open Questions
