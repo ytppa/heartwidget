@@ -55,22 +55,17 @@ final class FirebaseHeartRepository implements HeartRepository {
             HeartPairingState pairingState = localRepository.getPairingState();
 
             Map<String, Object> data = new HashMap<>();
+            data.putAll(buildUserData(pairingState));
             data.put("sentBeatCount", FieldValue.increment(1));
             data.put("receivedUnreadBeatCount", 0);
             data.put("lastSentBeatAt", FieldValue.serverTimestamp());
             data.put("updatedAt", FieldValue.serverTimestamp());
-            logTask("sent beat count write", firestore.collection(COLLECTION_USERS).document(user.getUid()).set(data, SetOptions.merge()));
+            com.google.android.gms.tasks.Task<Void> ownWrite = firestore.collection(COLLECTION_USERS)
+                    .document(user.getUid())
+                    .set(data, SetOptions.merge());
+            logTask("sent beat count write", ownWrite);
 
-            if (pairingState.getPairStatus() == HeartPairingStatus.PAIRED && pairingState.hasPartnerRemoteUserId()) {
-                Map<String, Object> partnerData = new HashMap<>();
-                partnerData.put("receivedUnreadBeatCount", FieldValue.increment(1));
-                partnerData.put("lastReceivedBeatAt", FieldValue.serverTimestamp());
-                partnerData.put("updatedAt", FieldValue.serverTimestamp());
-
-                logTask("partner received beat write", firestore.collection(COLLECTION_USERS)
-                        .document(pairingState.getPartnerRemoteUserId())
-                        .set(partnerData, SetOptions.merge()));
-            }
+            ownWrite.addOnSuccessListener(unused -> writePartnerReceivedBeat(pairingState));
         });
     }
 
@@ -226,6 +221,18 @@ final class FirebaseHeartRepository implements HeartRepository {
         data.put("pairCode", state.getPairCode());
         data.put("pairStatus", state.getPairStatus().getStoredValue());
         data.put("updatedAt", FieldValue.serverTimestamp());
+
+        if (state.hasPairRequestId()) {
+            data.put("pairRequestId", state.getPairRequestId());
+        } else {
+            data.put("pairRequestId", FieldValue.delete());
+        }
+
+        if (state.hasPartnerRemoteUserId()) {
+            data.put("partnerRemoteUserId", state.getPartnerRemoteUserId());
+        } else {
+            data.put("partnerRemoteUserId", FieldValue.delete());
+        }
 
         if (state.hasPartnerPairCode()) {
             data.put("partnerPairCode", state.getPartnerPairCode());
@@ -388,6 +395,21 @@ final class FirebaseHeartRepository implements HeartRepository {
             data.put("updatedAt", FieldValue.serverTimestamp());
             logTask("beat count sync write", firestore.collection(COLLECTION_USERS).document(user.getUid()).set(data, SetOptions.merge()));
         });
+    }
+
+    private void writePartnerReceivedBeat(HeartPairingState pairingState) {
+        if (pairingState.getPairStatus() != HeartPairingStatus.PAIRED || !pairingState.hasPartnerRemoteUserId()) {
+            return;
+        }
+
+        Map<String, Object> partnerData = new HashMap<>();
+        partnerData.put("receivedUnreadBeatCount", FieldValue.increment(1));
+        partnerData.put("lastReceivedBeatAt", FieldValue.serverTimestamp());
+        partnerData.put("updatedAt", FieldValue.serverTimestamp());
+
+        logTask("partner received beat write", firestore.collection(COLLECTION_USERS)
+                .document(pairingState.getPartnerRemoteUserId())
+                .set(partnerData, SetOptions.merge()));
     }
 
     private int clampRemoteCount(long count) {

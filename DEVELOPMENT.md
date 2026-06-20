@@ -50,6 +50,7 @@ Notes:
 - [x] Firebase smoke test on Mi A3 succeeded after phone DNS/network was restored: `users`, `pairCodes`, `pairRequests`, and `incomingPairRequests` writes were accepted.
 - [x] Updated `firestore.rules` were published in Firebase Console after the `incomingPairRequests` rules update.
 - [x] Paired beat delivery now writes `receivedUnreadBeatCount + 1` to the remote partner user document.
+- [x] Fixed the partner beat write path after `PERMISSION_DENIED`: rules now validate an accepted pair request before allowing a paired device to increment the partner unread count.
 - [x] Settings refresh / resume / pairing sync pull remote `receivedUnreadBeatCount` into local state and refresh widgets.
 - [ ] Republish `firestore.rules` after the paired-partner beat delivery rule update.
 - [ ] Received beat updates are pull-based until FCM/widget refresh triggers are added.

@@ -12,6 +12,27 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/pairCodes/$(pairCode)).data.ownerUserId == request.auth.uid;
     }
 
+    function acceptedPairRequestAllowsBeat(targetUserId) {
+      let sender = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      let pairRequest = get(/databases/$(database)/documents/pairRequests/$(sender.pairRequestId)).data;
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && sender.partnerId == targetUserId
+        && sender.pairRequestId is string
+        && exists(/databases/$(database)/documents/pairRequests/$(sender.pairRequestId))
+        && pairRequest.status == 'accepted'
+        && (
+          (
+            pairRequest.fromUserId == request.auth.uid
+            && pairRequest.acceptedByUserId == targetUserId
+          )
+          || (
+            pairRequest.fromUserId == targetUserId
+            && pairRequest.acceptedByUserId == request.auth.uid
+          )
+        );
+    }
+
     match /users/{userId} {
       allow read: if signedIn();
       allow create: if signedIn() && request.auth.uid == userId;
@@ -19,7 +40,7 @@ service cloud.firestore {
         && (
           request.auth.uid == userId
           || (
-            resource.data.partnerId == request.auth.uid
+            acceptedPairRequestAllowsBeat(userId)
             && request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly(['receivedUnreadBeatCount', 'lastReceivedBeatAt', 'updatedAt'])
           )
@@ -41,10 +62,12 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.fromUserId == request.auth.uid;
       allow update: if signedIn()
-        && (
-          resource.data.fromUserId == request.auth.uid
-          || ownsPairCode(resource.data.toPairCode)
-        );
+        && ownsPairCode(resource.data.toPairCode)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'acceptedByUserId', 'acceptedByPairCode', 'acceptedAt', 'updatedAt'])
+        && request.resource.data.status == 'accepted'
+        && request.resource.data.acceptedByUserId == request.auth.uid
+        && request.resource.data.acceptedByPairCode == resource.data.toPairCode;
     }
 
     match /incomingPairRequests/{pairCode} {
@@ -56,10 +79,12 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.fromUserId == request.auth.uid;
       allow update: if signedIn()
-        && (
-          ownsPairCode(pairCode)
-          || resource.data.fromUserId == request.auth.uid
-        );
+        && ownsPairCode(pairCode)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['requestId', 'status', 'acceptedByUserId', 'acceptedByPairCode', 'acceptedAt', 'updatedAt'])
+        && request.resource.data.status == 'accepted'
+        && request.resource.data.acceptedByUserId == request.auth.uid
+        && request.resource.data.acceptedByPairCode == pairCode;
     }
   }
 }
