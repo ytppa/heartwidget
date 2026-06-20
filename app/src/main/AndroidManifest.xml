@@ -23,7 +23,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.aga.nothingheart.action.HEART_BEAT" />
+                <action android:name="com.ytppa.nothingheart.action.HEART_BEAT" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

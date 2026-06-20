@@ -34,7 +34,7 @@ Current implementation:
 
 - Native Android project at the repository root.
 - Java, plain Android Activity, no AppCompat/Compose.
-- Package: `com.aga.nothingheart`.
+- Package: `com.ytppa.nothingheart`.
 - One APK contains:
   - `HeartWidgetProvider` home-screen widget;
   - `HeartSettingsActivity` launcher settings app.
@@ -94,9 +94,9 @@ README.md
 DEVELOPMENT.md
 ROADMAP.md
 app/src/main/AndroidManifest.xml
-app/src/main/java/com/aga/nothingheart/HeartWidgetProvider.java
-app/src/main/java/com/aga/nothingheart/HeartSettingsActivity.java
-app/src/main/java/com/aga/nothingheart/HeartStateStore.java
+app/src/main/java/com/ytppa/nothingheart/HeartWidgetProvider.java
+app/src/main/java/com/ytppa/nothingheart/HeartSettingsActivity.java
+app/src/main/java/com/ytppa/nothingheart/HeartStateStore.java
 app/src/main/res/layout/widget_heart.xml
 app/src/main/res/layout/activity_heart_settings.xml
 app/src/main/res/values/strings.xml

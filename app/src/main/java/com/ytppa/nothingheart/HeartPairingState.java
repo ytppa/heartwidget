@@ -1,4 +1,4 @@
-package com.aga.nothingheart;
+package com.ytppa.nothingheart;
 
 public final class HeartPairingState {
     private final String myUserId;

@@ -1,4 +1,4 @@
-package com.aga.nothingheart;
+package com.ytppa.nothingheart;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 public class HeartWidgetProvider extends AppWidgetProvider {
-    private static final String ACTION_HEART_BEAT = "com.aga.nothingheart.action.HEART_BEAT";
+    private static final String ACTION_HEART_BEAT = "com.ytppa.nothingheart.action.HEART_BEAT";
     private static final int[] HEARTBEAT_FRAME_RES_IDS = {
             R.drawable.heart_00,
             R.drawable.heart_01,

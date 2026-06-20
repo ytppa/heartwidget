@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.aga.nothingheart"
+    namespace = "com.ytppa.nothingheart"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.aga.nothingheart"
+        applicationId = "com.ytppa.nothingheart"
         minSdk = 23
         targetSdk = 35
         versionCode = 1

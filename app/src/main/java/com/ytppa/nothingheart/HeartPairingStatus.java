@@ -1,4 +1,4 @@
-package com.aga.nothingheart;
+package com.ytppa.nothingheart;
 
 public enum HeartPairingStatus {
     NONE("none"),

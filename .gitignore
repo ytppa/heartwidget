@@ -13,6 +13,7 @@ android-sdk/
 # Local helper environment and secrets.
 use-android-tools.ps1
 github toket.md.txt
+app/google-services.json
 
 # Local working notes for Codex sessions.
 agents.md

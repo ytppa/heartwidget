@@ -20,14 +20,14 @@ Status:
 
 Files:
 
-- [x] `app/src/main/java/com/aga/nothingheart/HeartRepository.java`
-- [x] `app/src/main/java/com/aga/nothingheart/LocalHeartRepository.java`
-- [x] `app/src/main/java/com/aga/nothingheart/HeartPairingState.java`
-- [x] `app/src/main/java/com/aga/nothingheart/HeartPairingStatus.java`
-- [x] `app/src/main/java/com/aga/nothingheart/HeartRepositories.java`
-- [x] `app/src/main/java/com/aga/nothingheart/HeartStateStore.java`
-- [x] `app/src/main/java/com/aga/nothingheart/HeartSettingsActivity.java`
-- [x] `app/src/main/java/com/aga/nothingheart/HeartWidgetProvider.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/HeartRepository.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/LocalHeartRepository.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/HeartPairingState.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/HeartPairingStatus.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/HeartRepositories.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/HeartStateStore.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/HeartSettingsActivity.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/HeartWidgetProvider.java`
 - [x] `app/src/main/res/layout/activity_heart_settings.xml`
 - [x] `app/src/main/res/values/strings.xml`
 
@@ -41,6 +41,7 @@ Notes:
 - [x] Widget tap still records a sent beat, clears received unread beats, and plays the heartbeat animation.
 - [x] The repository boundary is transport-independent so a backend adapter can replace the local implementation later.
 - [x] Backend decision gate is documented in `ROADMAP.md`; provider choice remains explicit and pending.
+- [x] Android application id / Firebase package name now uses author nickname: `com.ytppa.nothingheart`.
 - [ ] This is still offline-only and does not sync with another device yet.
 - [x] Local JDK / Android SDK tooling was restored in ignored project-local folders.
 
@@ -81,9 +82,9 @@ Status:
 
 Files:
 
-- [x] `app/src/main/java/com/aga/nothingheart/HeartSettingsActivity.java`
-- [x] `app/src/main/java/com/aga/nothingheart/HeartStateStore.java`
-- [x] `app/src/main/java/com/aga/nothingheart/HeartWidgetProvider.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/HeartSettingsActivity.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/HeartStateStore.java`
+- [x] `app/src/main/java/com/ytppa/nothingheart/HeartWidgetProvider.java`
 - [x] `app/src/main/res/layout/activity_heart_settings.xml`
 - [x] `app/src/main/res/layout/widget_heart.xml`
 

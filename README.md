@@ -23,11 +23,11 @@ The heartbeat is implemented with pre-rendered `drawable-nodpi` PNG frames becau
 
 ## Project Files
 
-- `app/src/main/java/com/aga/nothingheart/HeartWidgetProvider.java`
-- `app/src/main/java/com/aga/nothingheart/HeartSettingsActivity.java`
-- `app/src/main/java/com/aga/nothingheart/HeartStateStore.java`
-- `app/src/main/java/com/aga/nothingheart/HeartRepository.java`
-- `app/src/main/java/com/aga/nothingheart/LocalHeartRepository.java`
+- `app/src/main/java/com/ytppa/nothingheart/HeartWidgetProvider.java`
+- `app/src/main/java/com/ytppa/nothingheart/HeartSettingsActivity.java`
+- `app/src/main/java/com/ytppa/nothingheart/HeartStateStore.java`
+- `app/src/main/java/com/ytppa/nothingheart/HeartRepository.java`
+- `app/src/main/java/com/ytppa/nothingheart/LocalHeartRepository.java`
 - `tools/generate-heart-frames.ps1`
 - `DEVELOPMENT.md`
 - `ROADMAP.md`
