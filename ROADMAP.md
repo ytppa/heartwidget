@@ -21,10 +21,11 @@ Turn the widget into a paired "heart attention" experience:
 
 - [ ] Pairing with one other device
   - [x] User gets a local pair code in the offline prototype.
-  - [ ] User enters another person's connection ID.
-  - [ ] User A sends a connect request to User B.
+  - [x] User enters another person's connection ID in the local prototype.
+  - [x] Local prototype creates a pending request from the entered partner code.
+  - [ ] User A sends a backend-backed connect request to User B.
   - [ ] User B accepts or rejects.
-  - [ ] Each heart can be connected to only one other heart.
+  - [x] Local paired state is limited to one partner.
   - [x] Local unpair / reset pairing prototype.
   - [ ] Backend-backed unpair / reset pairing.
 
@@ -56,15 +57,21 @@ Turn the widget into a paired "heart attention" experience:
 - [ ] For a first reliable version, use a small backend rather than direct peer-to-peer.
 - [ ] The widget should stay functional even when network is unavailable, then sync later.
 
-## Possible Backend
+## Backend Decision Gate
 
-Preferred first option:
+Current decision state:
+
+- [x] Repository operations now map to backend-shaped actions: create identity, request pairing, complete local pairing, unpair, send beat, and clear received beats.
+- [x] The code stays transport-independent and does not hard-lock Firebase, Supabase, or a custom backend.
+- [ ] The backend provider still needs an explicit user decision before implementation.
+
+Recommended first option to confirm:
 
 - [ ] Firebase Authentication with anonymous users.
 - [ ] Cloud Firestore for pairing and counters.
 - [ ] Firebase Cloud Messaging for optional push nudges / widget refresh triggers.
 
-Alternative:
+Alternatives:
 
 - [ ] Supabase Auth + Postgres + Realtime.
 - [ ] Custom small backend with REST/WebSocket.

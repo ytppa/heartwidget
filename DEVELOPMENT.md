@@ -8,7 +8,7 @@ Goal:
 - [x] Add a backend-independent repository/adaptor boundary.
 - [x] Keep the first repository implementation local/offline-only.
 - [x] Show meaningful local pairing status in the settings Activity.
-- [x] Add local debug controls for pairing state.
+- [x] Add a local pairing flow around partner code entry.
 - [x] Keep existing widget behavior unchanged while the internal model evolves.
 - [ ] Add backend-backed pairing.
 
@@ -35,11 +35,12 @@ Notes:
 
 - [x] Local identity is generated on demand and stored in `SharedPreferences`.
 - [x] Pair code is generated locally and displayed in the settings Activity.
-- [x] Pairing status supports `none`, `pending`, and `paired`.
-- [x] Local debug controls can create identity, simulate pending pairing, simulate paired partner, and reset pairing.
-- [x] Installed APK was opened on connected Mi A3 and the local pairing UI was verified through create identity, pending, paired, and reset states.
+- [x] Pairing status supports `none`, `pending`, and `paired`, now with the entered partner pair code.
+- [x] Local pairing flow can create a local code, accept a partner code, create a pending request, complete local pairing, and unpair.
+- [x] Installed APK was opened on connected Mi A3 and the local pairing flow was verified with partner code `ABCD23` through pending, paired, and unpaired states.
 - [x] Widget tap still records a sent beat, clears received unread beats, and plays the heartbeat animation.
 - [x] The repository boundary is transport-independent so a backend adapter can replace the local implementation later.
+- [x] Backend decision gate is documented in `ROADMAP.md`; provider choice remains explicit and pending.
 - [ ] This is still offline-only and does not sync with another device yet.
 - [x] Local JDK / Android SDK tooling was restored in ignored project-local folders.
 

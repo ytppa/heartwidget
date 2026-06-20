@@ -11,11 +11,12 @@ Native Android home-screen widget prototype for a small paired-heart experience.
 - 10-frame heartbeat pulse by switching PNG frames through `RemoteViews`.
 - Local offline sent/received beat counters stored in `SharedPreferences`.
 - Local-only identity and pairing state stored in `SharedPreferences`.
+- Local pairing flow can create your code, enter a partner code, create a pending request, complete local pairing, and unpair.
 - Backend-independent repository boundary around beat and pairing operations.
 - Widget badge shows received unread beats.
 - Widget tap records a sent beat, clears received unread beats, and plays the heartbeat animation.
 - Compact counter badge formatting: `1.2K`, `10K`, `999K`, `1.2M`, `99M+`.
-- Settings app debug controls can send a local test beat and simulate incoming beats.
+- Settings app controls can send a local test beat and simulate incoming beats.
 - Minimum supported Android version: Android 6.0 / API 23.
 
 The heartbeat is implemented with pre-rendered `drawable-nodpi` PNG frames because Android home-screen widgets are not normal live Android views.

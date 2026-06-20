@@ -56,13 +56,13 @@ final class LocalHeartRepository implements HeartRepository {
     }
 
     @Override
-    public HeartPairingState simulatePendingPairing() {
-        return HeartStateStore.setPairingPending(context);
+    public HeartPairingState requestPairing(String partnerPairCode) {
+        return HeartStateStore.setPairingPending(context, partnerPairCode);
     }
 
     @Override
-    public HeartPairingState simulatePairedPartner() {
-        return HeartStateStore.setPairedWithGeneratedPartner(context);
+    public HeartPairingState completeLocalPairing() {
+        return HeartStateStore.completeLocalPairing(context);
     }
 
     @Override

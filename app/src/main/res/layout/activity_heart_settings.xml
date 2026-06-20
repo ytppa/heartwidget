@@ -89,19 +89,32 @@
             android:layout_marginTop="20dp"
             android:text="@string/create_identity" />
 
-        <Button
-            android:id="@+id/simulate_pending_pairing_button"
+        <EditText
+            android:id="@+id/partner_pair_code_input"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="12dp"
-            android:text="@string/simulate_pending_pairing" />
+            android:hint="@string/partner_pair_code_hint"
+            android:importantForAutofill="no"
+            android:inputType="textCapCharacters"
+            android:maxLength="6"
+            android:singleLine="true"
+            android:textColor="@color/settings_text_primary"
+            android:textColorHint="@color/settings_text_secondary" />
 
         <Button
-            android:id="@+id/simulate_paired_partner_button"
+            android:id="@+id/request_pairing_button"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="12dp"
-            android:text="@string/simulate_paired_partner" />
+            android:text="@string/request_pairing" />
+
+        <Button
+            android:id="@+id/complete_pairing_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/complete_local_pairing" />
 
         <Button
             android:id="@+id/reset_pairing_button"

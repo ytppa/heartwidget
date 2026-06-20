@@ -3,13 +3,20 @@ package com.aga.nothingheart;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class HeartSettingsActivity extends Activity {
     private HeartRepository repository;
     private TextView sentBeatCountValue;
     private TextView receivedBeatCountValue;
     private TextView pairingValue;
+    private EditText partnerPairCodeInput;
+    private Button createIdentityButton;
+    private Button requestPairingButton;
+    private Button completePairingButton;
+    private Button resetPairingButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,10 +27,11 @@ public class HeartSettingsActivity extends Activity {
         sentBeatCountValue = findViewById(R.id.sent_beat_count_value);
         receivedBeatCountValue = findViewById(R.id.received_beat_count_value);
         pairingValue = findViewById(R.id.pairing_value);
-        Button createIdentityButton = findViewById(R.id.create_identity_button);
-        Button simulatePendingPairingButton = findViewById(R.id.simulate_pending_pairing_button);
-        Button simulatePairedPartnerButton = findViewById(R.id.simulate_paired_partner_button);
-        Button resetPairingButton = findViewById(R.id.reset_pairing_button);
+        partnerPairCodeInput = findViewById(R.id.partner_pair_code_input);
+        createIdentityButton = findViewById(R.id.create_identity_button);
+        requestPairingButton = findViewById(R.id.request_pairing_button);
+        completePairingButton = findViewById(R.id.complete_pairing_button);
+        resetPairingButton = findViewById(R.id.reset_pairing_button);
         Button sendBeatButton = findViewById(R.id.send_beat_button);
         Button simulateIncomingBeatButton = findViewById(R.id.simulate_incoming_beat_button);
         Button simulateManyIncomingBeatsButton = findViewById(R.id.simulate_many_incoming_beats_button);
@@ -36,13 +44,13 @@ public class HeartSettingsActivity extends Activity {
             updateUi();
         });
 
-        simulatePendingPairingButton.setOnClickListener(view -> {
-            repository.simulatePendingPairing();
+        requestPairingButton.setOnClickListener(view -> {
+            requestPairing();
             updateUi();
         });
 
-        simulatePairedPartnerButton.setOnClickListener(view -> {
-            repository.simulatePairedPartner();
+        completePairingButton.setOnClickListener(view -> {
+            repository.completeLocalPairing();
             updateUi();
         });
 
@@ -103,6 +111,7 @@ public class HeartSettingsActivity extends Activity {
         sentBeatCountValue.setText(formatBeatCountDisplay(sentBeatCount));
         receivedBeatCountValue.setText(formatBeatCountDisplay(receivedBeatCount));
         pairingValue.setText(formatPairingDisplay(pairingState));
+        updatePairingControls(pairingState);
     }
 
     private String formatBeatCountDisplay(int beatCount) {
@@ -118,12 +127,64 @@ public class HeartSettingsActivity extends Activity {
             return getString(
                     R.string.pairing_state_paired,
                     pairingState.getPairCode(),
-                    pairingState.getPartnerId()
+                    formatPartner(pairingState)
             );
         }
         if (pairingState.getPairStatus() == HeartPairingStatus.PENDING) {
-            return getString(R.string.pairing_state_pending, pairingState.getPairCode());
+            return getString(
+                    R.string.pairing_state_pending,
+                    pairingState.getPairCode(),
+                    pairingState.getPartnerPairCode()
+            );
         }
         return getString(R.string.pairing_state_none, pairingState.getPairCode());
+    }
+
+    private void updatePairingControls(HeartPairingState pairingState) {
+        boolean hasLocalIdentity = pairingState.hasLocalIdentity();
+        boolean isPending = pairingState.getPairStatus() == HeartPairingStatus.PENDING;
+        boolean isPaired = pairingState.getPairStatus() == HeartPairingStatus.PAIRED;
+
+        createIdentityButton.setEnabled(!hasLocalIdentity);
+        partnerPairCodeInput.setEnabled(hasLocalIdentity && !isPaired);
+        requestPairingButton.setEnabled(hasLocalIdentity && !isPaired);
+        completePairingButton.setEnabled(isPending);
+        resetPairingButton.setEnabled(hasLocalIdentity && (isPending || isPaired));
+
+        if (!partnerPairCodeInput.hasFocus()) {
+            String visiblePartnerCode = pairingState.getPartnerPairCode();
+            if (!visiblePartnerCode.equals(partnerPairCodeInput.getText().toString())) {
+                partnerPairCodeInput.setText(visiblePartnerCode);
+            }
+        }
+    }
+
+    private void requestPairing() {
+        HeartPairingState pairingState = repository.getPairingState();
+        if (!pairingState.hasLocalIdentity()) {
+            Toast.makeText(this, R.string.pairing_error_missing_identity, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String partnerPairCode = HeartStateStore.normalizePairCode(partnerPairCodeInput.getText().toString());
+        partnerPairCodeInput.setText(partnerPairCode);
+
+        if (!HeartStateStore.isValidPairCode(partnerPairCode)) {
+            Toast.makeText(this, R.string.pairing_error_invalid_code, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (partnerPairCode.equals(pairingState.getPairCode())) {
+            Toast.makeText(this, R.string.pairing_error_own_code, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        repository.requestPairing(partnerPairCode);
+    }
+
+    private String formatPartner(HeartPairingState pairingState) {
+        if (pairingState.hasPartnerPairCode()) {
+            return pairingState.getPartnerPairCode();
+        }
+        return pairingState.getPartnerId();
     }
 }

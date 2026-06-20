@@ -19,9 +19,9 @@ public interface HeartRepository {
 
     HeartPairingState ensureLocalIdentity();
 
-    HeartPairingState simulatePendingPairing();
+    HeartPairingState requestPairing(String partnerPairCode);
 
-    HeartPairingState simulatePairedPartner();
+    HeartPairingState completeLocalPairing();
 
     HeartPairingState resetPairing();
 }

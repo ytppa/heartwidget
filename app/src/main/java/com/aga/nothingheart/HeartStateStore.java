@@ -15,9 +15,11 @@ public final class HeartStateStore {
     private static final String KEY_MY_USER_ID = "my_user_id";
     private static final String KEY_PAIR_CODE = "pair_code";
     private static final String KEY_PARTNER_ID = "partner_id";
+    private static final String KEY_PARTNER_PAIR_CODE = "partner_pair_code";
     private static final String KEY_PAIR_STATUS = "pair_status";
     private static final int PAIR_CODE_LENGTH = 6;
-    private static final char[] PAIR_CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ".toCharArray();
+    private static final String PAIR_CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+    private static final char[] PAIR_CODE_CHARS = PAIR_CODE_ALPHABET.toCharArray();
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private HeartStateStore() {
@@ -73,28 +75,36 @@ public final class HeartStateStore {
         return readPairingState(preferences);
     }
 
-    public static HeartPairingState setPairingPending(Context context) {
+    public static HeartPairingState setPairingPending(Context context, String partnerPairCode) {
         SharedPreferences preferences = prefs(context);
         ensureLocalIdentityExists(preferences);
+
+        String normalizedPartnerPairCode = normalizePairCode(partnerPairCode);
+        String ownPairCode = preferences.getString(KEY_PAIR_CODE, "");
+        if (!isValidPairCode(normalizedPartnerPairCode) || normalizedPartnerPairCode.equals(ownPairCode)) {
+            return readPairingState(preferences);
+        }
+
         preferences.edit()
                 .putString(KEY_PAIR_STATUS, HeartPairingStatus.PENDING.getStoredValue())
+                .putString(KEY_PARTNER_PAIR_CODE, normalizedPartnerPairCode)
                 .remove(KEY_PARTNER_ID)
                 .apply();
         return readPairingState(preferences);
     }
 
-    public static HeartPairingState setPairedWithGeneratedPartner(Context context) {
+    public static HeartPairingState completeLocalPairing(Context context) {
         SharedPreferences preferences = prefs(context);
         ensureLocalIdentityExists(preferences);
 
-        String partnerId = preferences.getString(KEY_PARTNER_ID, "");
-        if (isBlank(partnerId)) {
-            partnerId = generatePartnerId();
+        String partnerPairCode = preferences.getString(KEY_PARTNER_PAIR_CODE, "");
+        if (!isValidPairCode(partnerPairCode)) {
+            return readPairingState(preferences);
         }
 
         preferences.edit()
                 .putString(KEY_PAIR_STATUS, HeartPairingStatus.PAIRED.getStoredValue())
-                .putString(KEY_PARTNER_ID, partnerId)
+                .putString(KEY_PARTNER_ID, buildLocalPartnerId(partnerPairCode))
                 .apply();
         return readPairingState(preferences);
     }
@@ -104,6 +114,7 @@ public final class HeartStateStore {
         preferences.edit()
                 .putString(KEY_PAIR_STATUS, HeartPairingStatus.NONE.getStoredValue())
                 .remove(KEY_PARTNER_ID)
+                .remove(KEY_PARTNER_PAIR_CODE)
                 .apply();
         return readPairingState(preferences);
     }
@@ -128,6 +139,33 @@ public final class HeartStateStore {
             return (count / 1000000) + "M";
         }
         return "99M+";
+    }
+
+    public static String normalizePairCode(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder(PAIR_CODE_LENGTH);
+        for (int i = 0; i < value.length() && builder.length() < PAIR_CODE_LENGTH; i++) {
+            char character = Character.toUpperCase(value.charAt(i));
+            if (Character.isLetterOrDigit(character)) {
+                builder.append(character);
+            }
+        }
+        return builder.toString();
+    }
+
+    public static boolean isValidPairCode(String value) {
+        if (value == null || value.length() != PAIR_CODE_LENGTH) {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            if (PAIR_CODE_ALPHABET.indexOf(value.charAt(i)) < 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static String formatOneDecimal(int count, int divisor, String suffix) {
@@ -187,29 +225,33 @@ public final class HeartStateStore {
         String myUserId = preferences.getString(KEY_MY_USER_ID, "");
         String pairCode = preferences.getString(KEY_PAIR_CODE, "");
         String partnerId = preferences.getString(KEY_PARTNER_ID, "");
+        String partnerPairCode = preferences.getString(KEY_PARTNER_PAIR_CODE, "");
         HeartPairingStatus pairStatus = HeartPairingStatus.fromStoredValue(
                 preferences.getString(KEY_PAIR_STATUS, HeartPairingStatus.NONE.getStoredValue())
         );
 
+        if (pairStatus == HeartPairingStatus.PENDING && !isValidPairCode(partnerPairCode)) {
+            pairStatus = HeartPairingStatus.NONE;
+        }
         if (pairStatus == HeartPairingStatus.PAIRED && isBlank(partnerId)) {
             pairStatus = HeartPairingStatus.NONE;
         }
 
-        return new HeartPairingState(myUserId, pairCode, partnerId, pairStatus);
+        return new HeartPairingState(myUserId, pairCode, partnerId, partnerPairCode, pairStatus);
     }
 
     private static String generateUserId() {
         return "local-" + UUID.randomUUID();
     }
 
-    private static String generatePartnerId() {
-        return "partner-" + UUID.randomUUID();
+    private static String buildLocalPartnerId(String partnerPairCode) {
+        return "local-partner-" + partnerPairCode;
     }
 
     private static String generatePairCode() {
         StringBuilder builder = new StringBuilder(PAIR_CODE_LENGTH);
         for (int i = 0; i < PAIR_CODE_LENGTH; i++) {
-            builder.append(PAIR_CODE_ALPHABET[RANDOM.nextInt(PAIR_CODE_ALPHABET.length)]);
+            builder.append(PAIR_CODE_CHARS[RANDOM.nextInt(PAIR_CODE_CHARS.length)]);
         }
         return builder.toString();
     }
